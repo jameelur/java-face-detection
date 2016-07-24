@@ -1,3 +1,6 @@
+import data.CascadingClassifier;
+import parser.OpenCVParser;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -27,6 +30,9 @@ public class MainUI extends JFrame {
     private JPopupMenu viewportPopup;
     private JLabel infoLabel = new JLabel("");
 
+    private static CascadingClassifier openCVFrontalFace;
+    private static CascadingClassifier openCVEyes;
+
     public MainUI() {
         super("COMP 7502 - Workshop 1");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,9 +45,14 @@ public class MainUI extends JFrame {
 
     public static void main(String args[]) {
         try {
+            initCascadingClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {}
         new MainUI();
+    }
+
+    private static void initCascadingClassifiers() {
+        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
     }
 
     private class ImagePanel extends JPanel implements MouseListener, ActionListener, MouseMotionListener {
@@ -110,7 +121,7 @@ public class MainUI extends JFrame {
                     File file = fc.getSelectedFile();
                     try {
                         long start = System.nanoTime();
-                        // ImageIO.read(file);
+//                         ImageIO.read(file);
                         double seconds = (System.nanoTime() - start) / 1000000000.0;
                         infoLabel.setText(seconds+"");
                     } catch (Exception ee) {
