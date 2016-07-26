@@ -20,9 +20,9 @@ public class ImageUtilsTest {
 
         int[][] expectedI = new int[][] {
                 new int[] { 2,  4,  6,  8},
-                new int[] { 4,  10, 18,  28},
-                new int[] { 6,  18,  38,  68},
-                new int[] { 8,  28,  68,  138},
+                new int[] { 4,  8, 12,  16},
+                new int[] { 6,  12,  18,  24},
+                new int[] { 8,  16,  24,  32},
         };
 
         int[][] actual = new int[4][4];

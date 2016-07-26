@@ -12,6 +12,7 @@ public class ImageUtils {
                 integral[x][y] = g;
                 integral[x][y] += x > 0 ? integral[x - 1][y] : 0;
                 integral[x][y] += y > 0 ? integral[x][y - 1] : 0;
+                integral[x][y] -= x > 0 && y > 0 ? integral[x-1][y - 1] : 0;
             }
         }
 

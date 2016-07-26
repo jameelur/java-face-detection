@@ -1,15 +1,20 @@
 package com.cs.comp7502.rnd;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rmohamed on 7/26/2016.
  */
 public class WeakHaarClassifier {
 
-    private ArrayList<HaarFeature> classifierList = new ArrayList<>();
+    public WeakHaarClassifier(List<HaarFeature> classifierList) {
+        this.classifierList = classifierList;
+    }
 
-    public void addHaarFeature(HaarFeature feature) {
-        classifierList.add(feature);
+    private List<HaarFeature> classifierList = new ArrayList<>();
+
+    public void setClassifierList(ArrayList<HaarFeature> classifierList) {
+        this.classifierList = classifierList;
     }
 }
