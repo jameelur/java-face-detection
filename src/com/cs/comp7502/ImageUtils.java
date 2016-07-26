@@ -34,4 +34,17 @@ public class ImageUtils {
 
         return image;
     }
+
+    public static int sumIntegralImage(int[][] integralI, int x, int y, int w, int h) {
+
+        int endX = x + h - 1;
+        int endY = y + w - 1;
+
+        int sum = integralI[endX][endY];
+        sum -= x > 0 ? integralI[x - 1][endY] : 0;
+        sum -= y > 0 ? integralI[endX][y - 1] : 0;
+        sum += x > 0 && y > 0 ? integralI[x - 1][y - 1] : 0;
+
+        return sum;
+    }
 }

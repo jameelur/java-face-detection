@@ -60,7 +60,7 @@ public class TrainerTest {
     }
 
     @Test
-    public void train() throws Exception {
+    public void train_whenFeature1() throws Exception {
         // prepare
         int[][] testI = new int[24][24];
         for (int i = 0; i < 24; i++){
@@ -82,7 +82,47 @@ public class TrainerTest {
         assertEquals(6, haarFeature2.getHeight());
 
         assertEquals(21, haarFeature1.getFeatureVector().size());
+        assertEquals(18, haarFeature2.getFeatureVector().size());
+
+        for (int value: haarFeature1.getFeatureVector()){
+            assertEquals(0, value);
+        }
+        for (int value: haarFeature2.getFeatureVector()){
+            assertEquals(0, value);
+        }
+    }
+
+    @Test
+    public void train_whenFeature2() throws Exception {
+        // prepare
+        int[][] testI = new int[24][24];
+        for (int i = 0; i < 24; i++){
+            int[] col = new int[24];
+            Arrays.fill(col, 2);
+            testI[i] = col;
+        }
+
+        // execute
+        List<HaarFeature> train = Trainer.train(testI, 2);
+
+        // verify
+        HaarFeature haarFeature1 = train.get(0);
+        HaarFeature haarFeature2 = train.get(1);
+
+        assertEquals(4, haarFeature1.getWidth());
+        assertEquals(4, haarFeature2.getWidth());
+        assertEquals(3, haarFeature1.getHeight());
+        assertEquals(6, haarFeature2.getHeight());
+
         assertEquals(21, haarFeature1.getFeatureVector().size());
+        assertEquals(18, haarFeature2.getFeatureVector().size());
+
+        for (int value: haarFeature1.getFeatureVector()){
+            assertEquals(24, value);
+        }
+        for (int value: haarFeature2.getFeatureVector()){
+            assertEquals(48, value);
+        }
     }
 
 }

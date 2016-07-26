@@ -25,6 +25,10 @@ public class Trainer {
                     new HaarFeature(1,6,6))
     );
     public static int FEATURE_TYPE_2 = 2;
+    public static ArrayList<HaarFeature> FEATURE_2 = new ArrayList<>(
+            Arrays.asList(new HaarFeature(2,4,3),
+                    new HaarFeature(2,4,6))
+    );
     public static int FEATURE_TYPE_3 = 3;
     public static int FEATURE_TYPE_4 = 4;
     public static int FEATURE_TYPE_5 = 5;
@@ -74,10 +78,28 @@ public class Trainer {
                     // assume centered.
                     int y = (integralI[0].length - featW*2)/2;
                     // sum1 of pixels on S1
-                    int sum1 = (integralI[x+featH-1][y+featW-1] + integralI[x][y] - (integralI[x][y+featW-1] + integralI[x+featH-1][y]));
-                    int sum2 = (integralI[x+featH-1][y+featW*2-1] + integralI[x][y+featW] - (integralI[x][y+featW*2-1] + integralI[x+featH-1][y+featW]));
+
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH) ;
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH) ;
 
                     result.add(sum1-sum2);
+                }
+                featureList.add(result);
+            }
+        } else if (type == FEATURE_TYPE_2) {
+            for (HaarFeature feature : FEATURE_2) {
+                int featW = feature.getWidth();
+                int featH = feature.getHeight();
+                HaarFeature result = new HaarFeature(1, featW, featH);
+                for (int x = 0; x < h - featH; x++) {
+                    // assume centered.
+                    int y = (integralI[0].length - featW*2)/2;
+                    // sum1 of pixels on S1
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH) ;
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH) ;
+                    int sum3 = ImageUtils.sumIntegralImage(integralI, x, y + featW * 2, featW, featH) ;
+
+                    result.add(sum1-sum2+sum3);
                 }
                 featureList.add(result);
             }
