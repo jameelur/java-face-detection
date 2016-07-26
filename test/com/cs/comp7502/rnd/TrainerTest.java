@@ -1,7 +1,13 @@
 package com.cs.comp7502.rnd;
 
+import com.cs.comp7502.ImageUtils;
+import com.cs.comp7502.SimilarityComputation;
 import org.junit.Test;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,8 +22,40 @@ public class TrainerTest {
         // prepare
 
         // execture
-        Trainer.trainFaces();
+        List<WeakHaarClassifier> trainedClassifiers = Trainer.trainFaces();
 
+        ArrayList<WeakHaarClassifier> weakHaarClassifiers = new ArrayList<>();
+        ArrayList<int[][]> imageArray = new ArrayList<>();
+
+        File folder = new File("res/faces/24by24faces");
+//        File folder = new File("res/faces/test");
+        File[] files = folder.listFiles();
+
+        for (File file: files) {
+            BufferedImage bImage = null;
+            try {
+                bImage = ImageIO.read(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            imageArray.add(ImageUtils.buildGrayscaleImageArray(bImage));
+        }
+
+        long time = System.currentTimeMillis();
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter("results_faces.txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        for (int[][] image: imageArray){
+            List<HaarFeature> computedFeatures = Trainer.train(image, 1);
+            SimilarityComputation.voting(writer,new WeakHaarClassifier(computedFeatures), trainedClassifiers, 0.6);
+        }
+
+        writer.close();
         // verify
     }
 

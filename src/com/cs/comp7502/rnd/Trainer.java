@@ -38,22 +38,13 @@ public class Trainer {
         File[] files = folder.listFiles();
 
         for (File file: files) {
-            BufferedImage img = null;
+            BufferedImage bImage = null;
             try {
-                img = ImageIO.read(file);
+                bImage = ImageIO.read(file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Raster raster = img.getData();
-            int w = raster.getWidth();
-            int h = raster.getHeight();
-            int image[][] = new int[w][h];
-            for (int x = 0; x < h; x++) {
-                for (int y = 0; y < w; y++) {
-                    image[x][y] = raster.getSample(y, x, 0);
-                }
-            }
-            imageArray.add(image);
+            imageArray.add(ImageUtils.buildGrayscaleImageArray(bImage));
         }
 
         long time = System.currentTimeMillis();

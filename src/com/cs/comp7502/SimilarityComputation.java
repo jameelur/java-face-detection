@@ -1,6 +1,9 @@
+package com.cs.comp7502;
+
 import com.cs.comp7502.rnd.HaarFeature;
 import com.cs.comp7502.rnd.WeakHaarClassifier;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class SimilarityComputation {
 
         double similarity = Math.abs((double) innerDot / (Math.sqrt(normSquare1) * Math.sqrt(normSquare2)));
 
+//        System.out.println("similarity: " + similarity);
+
         return similarity >= threshold;
 
     }
@@ -60,9 +65,10 @@ public class SimilarityComputation {
 
     }
 
-    public static double voting(WeakHaarClassifier queryClassifier, ArrayList<WeakHaarClassifier> referenceClassifiers, double threshold) {
+    public static double voting(PrintWriter writer, WeakHaarClassifier queryClassifier, List<WeakHaarClassifier> referenceClassifiers, double threshold) {
         int numOfRefFace = referenceClassifiers.size();
         int numOfPosVote = 0;
+
 
         List<HaarFeature> queryFeatuerList = queryClassifier.getClassifierList();
         int numOfFeatuerType = queryFeatuerList.size();
@@ -79,13 +85,16 @@ public class SimilarityComputation {
 //                    ++newPosVote;
             }
 
-            System.out.println("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
+//            System.out.print("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
+//            System.out.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
+            writer.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace + "_ ");
             numOfPosVote += newPosVote;
         }
 
         double rate = (double) numOfPosVote / (numOfRefFace * numOfFeatuerType);
 
-        System.out.println("The overall positive voting rate: " + rate);
+//        System.out.println("\n The overall positive voting rate: " + rate);
+        writer.println("The overall positive voting rate: " + rate);
 
         return rate;
     }

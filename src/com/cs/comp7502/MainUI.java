@@ -2,10 +2,12 @@ package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadingClassifier;
 import com.cs.comp7502.parser.OpenCVParser;
+import com.cs.comp7502.rnd.HaarFeature;
+import com.cs.comp7502.rnd.Trainer;
+import com.cs.comp7502.rnd.WeakHaarClassifier;
+import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -13,7 +15,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,8 +38,10 @@ public class MainUI extends JFrame {
     private static CascadingClassifier openCVFrontalFace;
     private static CascadingClassifier openCVEyes;
 
+    private static List<WeakHaarClassifier> weakHaarClassifiers;
+
     public MainUI() {
-        super("COMP 7502 - Workshop 1");
+        super("COMP 7502 - Project");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JScrollPane scroller = new JScrollPane(new ImagePanel());
         this.add(scroller);
@@ -53,7 +59,9 @@ public class MainUI extends JFrame {
     }
 
     private static void initCascadingClassifiers() {
-        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
+//        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
+
+        weakHaarClassifiers = Trainer.trainFaces();
     }
 
     private class ImagePanel extends JPanel implements MouseListener, ActionListener, MouseMotionListener {
@@ -122,7 +130,14 @@ public class MainUI extends JFrame {
                     File file = fc.getSelectedFile();
                     try {
                         long start = System.nanoTime();
-//                         ImageIO.read(file);
+                        BufferedImage bImage = ImageIO.read(file);
+
+                        int[][] image = ImageUtils.buildGrayscaleImageArray(bImage);
+                        // retrieve weak haar classifier
+                        List<HaarFeature> computedFeatures = Trainer.train(image, 1);
+
+                        SimilarityComputation.voting(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
+
                         double seconds = (System.nanoTime() - start) / 1000000000.0;
                         infoLabel.setText(seconds+"");
                     } catch (Exception ee) {
