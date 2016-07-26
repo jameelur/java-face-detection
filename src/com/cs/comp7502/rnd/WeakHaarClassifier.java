@@ -17,4 +17,8 @@ public class WeakHaarClassifier {
     public void setClassifierList(ArrayList<HaarFeature> classifierList) {
         this.classifierList = classifierList;
     }
+
+    public List<HaarFeature> getClassifierList() {
+        return this.classifierList;
+    }
 }
