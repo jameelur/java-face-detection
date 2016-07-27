@@ -35,6 +35,11 @@ public class Trainer {
                     new HaarFeature(3, 12, 6))
     );
     public static int FEATURE_TYPE_4 = 4;
+    public static ArrayList<HaarFeature> FEATURE_4 = new ArrayList<>(
+            Arrays.asList(new HaarFeature(4, 12, 4),
+                    new HaarFeature(4, 16, 5),
+                    new HaarFeature(4, 20, 6))
+    );
     public static int FEATURE_TYPE_5 = 5;
     public static ArrayList<HaarFeature> FEATURE_5 = new ArrayList<>(
             Arrays.asList(new HaarFeature(5, 6, 4),
@@ -126,6 +131,23 @@ public class Trainer {
                     int sum2 = ImageUtils.sumIntegralImage(integralI, x + featH, y, featW, featH);
 
                     result.add(sum1 - sum2);
+                }
+                featureList.add(result);
+            }
+        } else if (type == FEATURE_TYPE_4){
+            for (HaarFeature feature : FEATURE_4) {
+                int featW = feature.getWidth();
+                int featH = feature.getHeight();
+                HaarFeature result = new HaarFeature(1, featW, featH);
+                for (int x = 0; x < h - (featH * 3 - 1); x++) {
+                    // assume centered.
+                    int y = (integralI[0].length - featW * 2) / 2;
+
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH);
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x + featH, y, featW, featH);
+                    int sum3 = ImageUtils.sumIntegralImage(integralI, x + featH + featH, y, featW, featH);
+
+                    result.add(sum1 - sum2 + sum3);
                 }
                 featureList.add(result);
             }
