@@ -25,6 +25,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -160,15 +161,49 @@ public class MainUI extends JFrame {
                     }
                 }
             } else if (e.getActionCommand().equals("drawRect")){
+
+                double finalThreshold = 0.6;
+                double similarityThreshold = 0.6;
+                boolean notOk = true;
+                while (notOk) {
+                    String s = JOptionPane.showInputDialog(this, "Please enter final threshold! \n(Must be <1 and positive)", ""+finalThreshold);
+                    if (s==null) {
+                        return;
+                    }
+                    try {
+                        double d = Double.parseDouble(s);
+                        if (d>=0.0 && d<1.0) {
+                            notOk = false;
+                            finalThreshold = d;
+                        }
+                    } catch (Exception ee){
+                    }
+                }
+                notOk = true;
+                while (notOk) {
+                    String s = JOptionPane.showInputDialog(this, "Please enter similarity threshold! \n(Must be <1 and positive)", ""+similarityThreshold);
+                    if (s==null) {
+                        return;
+                    }
+                    try {
+                        double d = Double.parseDouble(s);
+                        if (d>=0.0 && d<1.0) {
+                            notOk = false;
+                            similarityThreshold = d;
+                        }
+                    } catch (Exception ee){
+                    }
+                }
+                //too scared to run or test this bit
+//                Detector detector = new Detector();
+//                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
+
                 //for testing color and line thickness
                 Rectangle faceArea = new Rectangle(50, 50, 70, 70);
-                Rectangle faceArea2 = new Rectangle(100, 100, 90, 90);
+                Rectangle faceArea2 = new Rectangle(235, 220, 110, 110);
                 rectangles.add(faceArea);
                 rectangles.add(faceArea2);
 
-                //too scared to run or test this bit
-//                Detector detector = new Detector();
-//                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, 0.6, 0.6);
                 if (rectangles!=null) {
                     Graphics2D drawing = img.createGraphics();
                     drawing.setColor(Color.GREEN);
