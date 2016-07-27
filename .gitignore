@@ -31,3 +31,6 @@ out/*
 hs_err_pid*
 
 *.iml
+
+res/faces/*.png
+res/nonfaces/*.png
