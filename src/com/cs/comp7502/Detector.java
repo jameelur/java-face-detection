@@ -38,7 +38,7 @@ public class Detector {
         // for each possible window
         // run through cascading com.cs.comp7502.classifier and gt true or false
         // if true add the location to the image and the size of the window
-        for (int winSize = 24; (winSize <= width) && (winSize <= width); winSize *= 2) { // enlarge the size of sliding window twice each loop
+        for (int winSize = 24; (winSize <= width) && (winSize <= height); winSize *= 2) { // enlarge the size of sliding window twice each loop
             for (int x = 0; x <= height - winSize; x++) {
                 for (int y = 0; y <= width - winSize; y++) {
                     int[][] slidingWindow = new int[winSize][winSize];
