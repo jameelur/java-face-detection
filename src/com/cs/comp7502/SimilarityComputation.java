@@ -1,10 +1,8 @@
 package com.cs.comp7502;
 
-import com.cs.comp7502.rnd.HaarFeature;
-import com.cs.comp7502.rnd.WeakHaarClassifier;
+import com.cs.comp7502.rnd.WHaarClassifier;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +14,7 @@ public class SimilarityComputation {
     public SimilarityComputation() {
         super();
     }
+
 
     public static double cosSimilarity(List<Integer> vector1, List<Integer> vector2, double threshold) {
         if (vector1.size() != vector2.size()) {
@@ -70,23 +69,18 @@ public class SimilarityComputation {
 
     }
 
-    public static double voting(PrintWriter writer, WeakHaarClassifier queryClassifier, List<WeakHaarClassifier> referenceClassifiers, double threshold) {
+    public static double voting2(PrintWriter writer, WHaarClassifier queryClassifier, List<WHaarClassifier> referenceClassifiers, double threshold) {
         int numOfRefFace = referenceClassifiers.size();
         double sumOfSimilarity = 0.0;
 
 
-        List<HaarFeature> queryFeatuerList = queryClassifier.getClassifierList();
-        int numOfFeatuerType = queryFeatuerList.size();
+        List<Integer> queryFeatureVector = queryClassifier.getFeatureVector();
 
-        for (int featureTypeIndex = 0; featureTypeIndex < numOfFeatuerType; ++featureTypeIndex) {
-            List<Integer> queryFeatureVector = queryFeatuerList.get(featureTypeIndex).getFeatureVector();
-            double newAddedSimilarity = 0.0;
+        for (WHaarClassifier wHaarClassifier : referenceClassifiers) {
+            List<Integer> referenceFeatureVector = wHaarClassifier.getFeatureVector();
 
-            for (WeakHaarClassifier weakHaarClassifier : referenceClassifiers) {
-                List<Integer> referenceFeatureVector = weakHaarClassifier.getClassifierList().get(featureTypeIndex).getFeatureVector();
-                newAddedSimilarity += cosSimilarity(queryFeatureVector, referenceFeatureVector, threshold);
-//                newAddedSimilarity += correlation(queryFeatureVector, referenceFeatureVector, threshold);
-            }
+            sumOfSimilarity += cosSimilarity(queryFeatureVector, referenceFeatureVector, threshold);
+//            sumOfSimilarity += correlation(queryFeatureVector, referenceFeatureVector, threshold);
 
 //            System.out.print("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
 //            System.out.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
@@ -94,13 +88,46 @@ public class SimilarityComputation {
             sumOfSimilarity += newAddedSimilarity;
         }
 
-        double average = sumOfSimilarity / (numOfRefFace * numOfFeatuerType);
+        }
+        double average = sumOfSimilarity / numOfRefFace;
 
 //        System.out.println("\n The overall positive voting rate: " + rate);
         if (writer != null) writer.println(" _ The average similarity _ " + average);
 
         return average;
     }
+
+//    public static double voting(PrintWriter writer, WeakHaarClassifier queryClassifier, List<WeakHaarClassifier> referenceClassifiers, double threshold) {
+//        int numOfRefFace = referenceClassifiers.size();
+//        double sumOfSimilarity = 0.0;
+//
+//
+//        List<WHaarClassifier> queryFeatuerList = queryClassifier.getClassifierList();
+//        int numOfFeatuerType = queryFeatuerList.size();
+//
+//        for (int featureTypeIndex = 0; featureTypeIndex < numOfFeatuerType; ++featureTypeIndex) {
+//            List<Integer> queryFeatureVector = queryFeatuerList.get(featureTypeIndex).getFeatureVector();
+//            double newAddedSimilarity = 0.0;
+//
+//            for (WeakHaarClassifier weakHaarClassifier : referenceClassifiers) {
+//                List<Integer> referenceFeatureVector = weakHaarClassifier.getClassifierList().get(featureTypeIndex).getFeatureVector();
+//                newAddedSimilarity += cosSimilarity(queryFeatureVector, referenceFeatureVector, threshold);
+////                newAddedSimilarity += correlation(queryFeatureVector, referenceFeatureVector, threshold);
+//            }
+//
+////            System.out.print("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
+////            System.out.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
+//            writer.print(featureTypeIndex + "_ " + newAddedSimilarity / numOfRefFace + "_");
+//            sumOfSimilarity += newAddedSimilarity;
+//        }
+//
+//        double average = sumOfSimilarity / (numOfRefFace * numOfFeatuerType);
+//
+////        System.out.println("\n The overall positive voting rate: " + rate);
+//        writer.println(" _ The average similarity _ " + average);
+//
+//        return average;
+//    }
 
 //    public static boolean cosSimilarity(List<Integer> vector1, List<Integer> vector2, double threshold) {
 //        if (vector1.size() != vector2.size()) {
@@ -159,7 +186,7 @@ public class SimilarityComputation {
 //        int numOfPosVote = 0;
 //
 //
-//        List<HaarFeature> queryFeatuerList = queryClassifier.getClassifierList();
+//        List<WHaarClassifier> queryFeatuerList = queryClassifier.getClassifierList();
 //        int numOfFeatuerType = queryFeatuerList.size();
 //
 //        for (int featureTypeIndex = 0; featureTypeIndex < numOfFeatuerType; ++featureTypeIndex) {
