@@ -69,30 +69,23 @@ public class SimilarityComputation {
 
     }
 
-    public static double voting2(PrintWriter writer, WHaarClassifier queryClassifier, List<WHaarClassifier> referenceClassifiers, double threshold) {
+    public static double voting(PrintWriter writer, WHaarClassifier queryClassifier, List<WHaarClassifier> referenceClassifiers, double threshold) {
         int numOfRefFace = referenceClassifiers.size();
         double sumOfSimilarity = 0.0;
-
 
         List<Integer> queryFeatureVector = queryClassifier.getFeatureVector();
 
         for (WHaarClassifier wHaarClassifier : referenceClassifiers) {
             List<Integer> referenceFeatureVector = wHaarClassifier.getFeatureVector();
 
-            sumOfSimilarity += cosSimilarity(queryFeatureVector, referenceFeatureVector, threshold);
-//            sumOfSimilarity += correlation(queryFeatureVector, referenceFeatureVector, threshold);
+            double similarity = cosSimilarity(queryFeatureVector, referenceFeatureVector, threshold);
 
-//            System.out.print("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
-//            System.out.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
-            if (writer != null) writer.print(featureTypeIndex + "_ " + newAddedSimilarity / numOfRefFace + "_");
-            sumOfSimilarity += newAddedSimilarity;
+            writer.println(similarity);
+
+            sumOfSimilarity += similarity;
         }
 
-        }
         double average = sumOfSimilarity / numOfRefFace;
-
-//        System.out.println("\n The overall positive voting rate: " + rate);
-        if (writer != null) writer.println(" _ The average similarity _ " + average);
 
         return average;
     }

@@ -7,15 +7,21 @@ import java.util.List;
  * Created by rmohamed on 7/26/2016.
  */
 
-public class HaarFeature {
+public class WHaarClassifier {
     private int width, height;
     private int type;
+    private int subtype;
     private List<Integer> featureVector = new ArrayList<>();
 
-    public HaarFeature(int type, int width, int height) {
+    public WHaarClassifier(int type, int subtype, int width, int height) {
         this.type = type;
+        this.subtype = subtype;
         this.width = width;
         this.height = height;
+    }
+
+    public void setFeatureVector(List<Integer> featureVector) {
+        this.featureVector = featureVector;
     }
 
     public int getWidth(){
@@ -32,5 +38,9 @@ public class HaarFeature {
 
     public List<Integer> getFeatureVector() {
         return featureVector;
+    }
+
+    public String getKey(){
+        return type + "_" + subtype;
     }
 }

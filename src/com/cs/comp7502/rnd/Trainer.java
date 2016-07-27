@@ -1,18 +1,13 @@
 package com.cs.comp7502.rnd;
 
 import com.cs.comp7502.ImageUtils;
-import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
+import com.cs.comp7502.data.WeakClassifier;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by rmohamed on 7/26/2016.
@@ -20,38 +15,38 @@ import java.util.List;
 public class Trainer {
 
     public static int FEATURE_TYPE_1 = 1;
-    public static ArrayList<HaarFeature> FEATURE_1 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(1, 6, 3),
-                    new HaarFeature(1, 6, 6))
+    public static ArrayList<WHaarClassifier> FEATURE_1 = new ArrayList<>(
+            Arrays.asList(new WHaarClassifier(1, 1, 6, 3),
+                    new WHaarClassifier(1, 2, 6, 6))
     );
     public static int FEATURE_TYPE_2 = 2;
-    public static ArrayList<HaarFeature> FEATURE_2 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(2, 4, 3),
-                    new HaarFeature(2, 4, 6))
+    public static ArrayList<WHaarClassifier> FEATURE_2 = new ArrayList<>(
+            Arrays.asList(new WHaarClassifier(2, 1, 4, 3),
+                    new WHaarClassifier(2, 2, 4, 6))
     );
     public static int FEATURE_TYPE_3 = 3;
-    public static ArrayList<HaarFeature> FEATURE_3 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(3, 6, 6),
-                    new HaarFeature(3, 12, 6))
+    public static ArrayList<WHaarClassifier> FEATURE_3 = new ArrayList<>(
+            Arrays.asList(new WHaarClassifier(3, 1, 6, 6),
+                    new WHaarClassifier(3, 2, 12, 6))
     );
     public static int FEATURE_TYPE_4 = 4;
-    public static ArrayList<HaarFeature> FEATURE_4 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(4, 12, 4),
-                    new HaarFeature(4, 16, 5),
-                    new HaarFeature(4, 20, 6))
+    public static ArrayList<WHaarClassifier> FEATURE_4 = new ArrayList<>(
+            Arrays.asList(new WHaarClassifier(4, 1, 12, 4),
+                    new WHaarClassifier(4, 2, 16, 5),
+                    new WHaarClassifier(4, 3, 20, 6))
     );
     public static int FEATURE_TYPE_5 = 5;
-    public static ArrayList<HaarFeature> FEATURE_5 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(5, 6, 4),
-                    new HaarFeature(5, 8, 6),
-                    new HaarFeature(5, 10, 8))
+    public static ArrayList<WHaarClassifier> FEATURE_5 = new ArrayList<>(
+            Arrays.asList(new WHaarClassifier(5, 1, 6, 4),
+                    new WHaarClassifier(5, 2, 8, 6),
+                    new WHaarClassifier(5, 3, 10, 8))
     );
 
-    public static List<WeakHaarClassifier> trainFaces() {
-        ArrayList<WeakHaarClassifier> weakHaarClassifiers = new ArrayList<>();
-        ArrayList<int[][]> imageArray = new ArrayList<>();
+    public static Map<String, List<WHaarClassifier>> trainFaces() {
+        List<WHaarClassifier> trainedClassifierList = new ArrayList<>();
+        List<int[][]> imageArray = new ArrayList<>();
 
-        File folder = new File("res/faces/24by24faces");
+        File folder = new File("../24by24faces");
 //        File folder = new File("res/faces/test");
         File[] files = folder.listFiles();
 
@@ -66,17 +61,42 @@ public class Trainer {
         }
 
         long time = System.currentTimeMillis();
+        // for each face image in the training data set
         for (int[][] image : imageArray) {
-            weakHaarClassifiers.add(new WeakHaarClassifier(train(image, 1)));
+            trainedClassifierList.addAll(train(image));
         }
+
+        Map<String, List<WHaarClassifier>> trainedClassifierMap = convertClassifierListToMap(trainedClassifierList);
 
         System.out.println("Time Taken to train " + imageArray.size() + " number of image is " + ((System.currentTimeMillis() - time) / 1000.0) + "s");
 
+        return trainedClassifierMap;
+    }
+
+    public static Map<String, List<WHaarClassifier>> convertClassifierListToMap(List<WHaarClassifier> classifierList){
+        Map<String, List<WHaarClassifier>> classifierMap = new HashMap<>();
+        for (WHaarClassifier classifier: classifierList) {
+            List<WHaarClassifier> tempList = classifierMap.get(classifier.getKey());
+            if (tempList == null) tempList = new ArrayList<>();
+            tempList.add(classifier);
+            classifierMap.put(classifier.getKey(), tempList);
+        }
+
+        return classifierMap;
+    }
+
+    public static List<WHaarClassifier> train(int[][] image) {
+        List<WHaarClassifier> weakHaarClassifiers = new ArrayList<>();
+        // for each of the 5 features
+        for (int i = 1; i < 6; i++){
+            // collect the resultant classifiers in a list
+            weakHaarClassifiers.addAll(train(image, i));
+        }
         return weakHaarClassifiers;
     }
 
-    public static List<HaarFeature> train(int[][] inputI, int type) {
-        List<HaarFeature> featureList = new ArrayList<>();
+    public static List<WHaarClassifier> train(int[][] inputI, int type) {
+        List<WHaarClassifier> featureList = new ArrayList<>();
 
         int h = inputI.length;
         int w = inputI[0].length;
@@ -84,10 +104,11 @@ public class Trainer {
         ImageUtils.buildIntegralImage(inputI, integralI, w, h);
 
         if (type == FEATURE_TYPE_1) {
-            for (HaarFeature feature : FEATURE_1) {
+            int i = 1;
+            for (WHaarClassifier feature : FEATURE_1) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
-                HaarFeature result = new HaarFeature(1, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(1, i, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
@@ -99,12 +120,14 @@ public class Trainer {
                     result.add(sum1 - sum2);
                 }
                 featureList.add(result);
+                i++;
             }
         } else if (type == FEATURE_TYPE_2) {
-            for (HaarFeature feature : FEATURE_2) {
+            int i = 1;
+            for (WHaarClassifier feature : FEATURE_2) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
-                HaarFeature result = new HaarFeature(1, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(2, i, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
@@ -116,12 +139,14 @@ public class Trainer {
                     result.add(sum1 - sum2 + sum3);
                 }
                 featureList.add(result);
+                i++;
             }
         } else if (type == FEATURE_TYPE_3) {
-            for (HaarFeature feature : FEATURE_3) {
+            int i = 1;
+            for (WHaarClassifier feature : FEATURE_3) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
-                HaarFeature result = new HaarFeature(3, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(3, i, featW, featH);
                 for (int x = 0; x < h - (featH * 2 - 1); x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
@@ -133,12 +158,14 @@ public class Trainer {
                     result.add(sum1 - sum2);
                 }
                 featureList.add(result);
+                i++;
             }
         } else if (type == FEATURE_TYPE_4){
-            for (HaarFeature feature : FEATURE_4) {
+            int i = 1;
+            for (WHaarClassifier feature : FEATURE_4) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
-                HaarFeature result = new HaarFeature(1, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(4, i, featW, featH);
                 for (int x = 0; x < h - (featH * 3 - 1); x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
@@ -150,12 +177,14 @@ public class Trainer {
                     result.add(sum1 - sum2 + sum3);
                 }
                 featureList.add(result);
+                i++;
             }
         } else if (type == FEATURE_TYPE_5) {
-            for (HaarFeature feature : FEATURE_5) {
+            int i = 1;
+            for (WHaarClassifier feature : FEATURE_5) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
-                HaarFeature result = new HaarFeature(1, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(5, i, featW, featH);
                 for (int x = 0; x < h - (featH * 2 - 1); x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
@@ -168,6 +197,7 @@ public class Trainer {
                     result.add(sum1 - sum2 - sum3 + sum4);
                 }
                 featureList.add(result);
+                i++;
             }
         }
         return featureList;
