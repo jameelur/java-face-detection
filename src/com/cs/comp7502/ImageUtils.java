@@ -18,7 +18,6 @@ public class ImageUtils {
                 integral[x][y] -= x > 0 && y > 0 ? integral[x-1][y - 1] : 0;
             }
         }
-
     }
 
     public static int[][] buildGrayscaleImageArray(BufferedImage bImage){
@@ -31,7 +30,6 @@ public class ImageUtils {
                 image[x][y] = raster.getSample(y, x, 0);
             }
         }
-
         return image;
     }
 

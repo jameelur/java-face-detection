@@ -2,9 +2,11 @@ package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadingClassifier;
 import com.cs.comp7502.rnd.Trainer;
+import com.cs.comp7502.rnd.WHaarClassifier;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class Detector {
 
@@ -20,7 +22,7 @@ public class Detector {
         this.cClassifier = cClassifier;
     }
 
-    public java.util.List<Rectangle> detectFaces(int[][] input, ColourUtils.Grayscale type, float scale, float increment) {
+    public java.util.List<Rectangle> detectFaces(int[][] input, ColourUtils.Grayscale type, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
         ArrayList<Rectangle> rectangles = new ArrayList<>();
 
         int width = input.length;
@@ -34,7 +36,6 @@ public class Detector {
         setIntensity(input, image, image2, type);
 
         // find max scale
-        // for each window scale, increment by scale
         // for each possible window
         // run through cascading com.cs.comp7502.classifier and gt true or false
         // if true add the location to the image and the size of the window
@@ -45,13 +46,29 @@ public class Detector {
                     for (int i = 0; i < winSize; i++) {
                         slidingWindow[i] = Arrays.copyOfRange(image[x + i], y, y + winSize);
                     }
-//                    Trainer.getDetector(slidingWindow);
+                    doesFaceExist(image, trainedClassifiers, finalThreshold, similarityThreshold);
                 }
             }
         }
 
-
         return rectangles;
+    }
+
+    private boolean doesFaceExist(int[][] image, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
+        List<WHaarClassifier> computedFeatures = Trainer.train(image);
+        int positiveCount = 0;
+        int negativeCount = 0;
+        for (WHaarClassifier feature : computedFeatures){
+            double similarity = SimilarityComputation.avgFeatureSimilarity(null, feature, trainedClassifiers.get(feature.getKey()));
+            if (similarity > similarityThreshold) positiveCount++;
+            else negativeCount++;
+        }
+
+        System.out.print("# of Positive Count: " + positiveCount);
+        System.out.println(" # of Negative Count: " + negativeCount);
+
+        if (positiveCount / (positiveCount + negativeCount) > finalThreshold) return true;
+        return false;
     }
 
     /**

@@ -14,6 +14,8 @@ import java.util.*;
  */
 public class Trainer {
 
+    public static final int ORIGINAL_WINDOW_SIZE = 24;
+
     public static int FEATURE_TYPE_1 = 1;
     public static ArrayList<WHaarClassifier> FEATURE_1 = new ArrayList<>(
             Arrays.asList(new WHaarClassifier(1, 1, 6, 3),
@@ -103,16 +105,17 @@ public class Trainer {
         int[][] integralI = new int[h][w];
         ImageUtils.buildIntegralImage(inputI, integralI, w, h);
 
+        int windowScale = h / ORIGINAL_WINDOW_SIZE;
+
         if (type == FEATURE_TYPE_1) {
             int i = 1;
             for (WHaarClassifier feature : FEATURE_1) {
-                int featW = feature.getWidth();
-                int featH = feature.getHeight();
+                int featW = feature.getWidth() * windowScale;
+                int featH = feature.getHeight() * windowScale;
                 WHaarClassifier result = new WHaarClassifier(1, i, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
-                    // sum1 of pixels on S1
 
                     int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH);
                     int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH);
@@ -125,8 +128,8 @@ public class Trainer {
         } else if (type == FEATURE_TYPE_2) {
             int i = 1;
             for (WHaarClassifier feature : FEATURE_2) {
-                int featW = feature.getWidth();
-                int featH = feature.getHeight();
+                int featW = feature.getWidth() * windowScale;
+                int featH = feature.getHeight() * windowScale;
                 WHaarClassifier result = new WHaarClassifier(2, i, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
@@ -144,8 +147,8 @@ public class Trainer {
         } else if (type == FEATURE_TYPE_3) {
             int i = 1;
             for (WHaarClassifier feature : FEATURE_3) {
-                int featW = feature.getWidth();
-                int featH = feature.getHeight();
+                int featW = feature.getWidth() * windowScale;
+                int featH = feature.getHeight() * windowScale;
                 WHaarClassifier result = new WHaarClassifier(3, i, featW, featH);
                 for (int x = 0; x < h - (featH * 2 - 1); x++) {
                     // assume centered.
@@ -163,8 +166,8 @@ public class Trainer {
         } else if (type == FEATURE_TYPE_4){
             int i = 1;
             for (WHaarClassifier feature : FEATURE_4) {
-                int featW = feature.getWidth();
-                int featH = feature.getHeight();
+                int featW = feature.getWidth() * windowScale;
+                int featH = feature.getHeight() * windowScale;
                 WHaarClassifier result = new WHaarClassifier(4, i, featW, featH);
                 for (int x = 0; x < h - (featH * 3 - 1); x++) {
                     // assume centered.
@@ -182,8 +185,8 @@ public class Trainer {
         } else if (type == FEATURE_TYPE_5) {
             int i = 1;
             for (WHaarClassifier feature : FEATURE_5) {
-                int featW = feature.getWidth();
-                int featH = feature.getHeight();
+                int featW = feature.getWidth() * windowScale;
+                int featH = feature.getHeight() * windowScale;
                 WHaarClassifier result = new WHaarClassifier(5, i, featW, featH);
                 for (int x = 0; x < h - (featH * 2 - 1); x++) {
                     // assume centered.

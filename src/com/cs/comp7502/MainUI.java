@@ -136,7 +136,7 @@ public class MainUI extends JFrame {
                         List<WHaarClassifier> computedFeatures = Trainer.train(image);
 
                         // for each classifier perform a comparison
-//                        SimilarityComputation.voting(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
+//                        SimilarityComputation.avgFeatureSimilarity(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
 
                         double seconds = (System.nanoTime() - start) / 1000000000.0;
                         infoLabel.setText(seconds+"");

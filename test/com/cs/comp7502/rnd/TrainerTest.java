@@ -75,7 +75,7 @@ public class TrainerTest {
                 }
 
                 for (WHaarClassifier feature : classifiers){
-                    double similarity = SimilarityComputation.voting(writer, feature, trainedClassifiers.get(feature.getKey()), 0.6);
+                    double similarity = SimilarityComputation.avgFeatureSimilarity(null, feature, trainedClassifiers.get(feature.getKey()));
                 }
 
                 writer.close();
