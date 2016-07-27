@@ -21,15 +21,19 @@ public class Trainer {
 
     public static int FEATURE_TYPE_1 = 1;
     public static ArrayList<HaarFeature> FEATURE_1 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(1,6,3),
-                    new HaarFeature(1,6,6))
+            Arrays.asList(new HaarFeature(1, 6, 3),
+                    new HaarFeature(1, 6, 6))
     );
     public static int FEATURE_TYPE_2 = 2;
     public static ArrayList<HaarFeature> FEATURE_2 = new ArrayList<>(
-            Arrays.asList(new HaarFeature(2,4,3),
-                    new HaarFeature(2,4,6))
+            Arrays.asList(new HaarFeature(2, 4, 3),
+                    new HaarFeature(2, 4, 6))
     );
     public static int FEATURE_TYPE_3 = 3;
+    public static ArrayList<HaarFeature> FEATURE_3 = new ArrayList<>(
+            Arrays.asList(new HaarFeature(3, 6, 6),
+                    new HaarFeature(3, 12, 6))
+    );
     public static int FEATURE_TYPE_4 = 4;
     public static int FEATURE_TYPE_5 = 5;
     public static ArrayList<HaarFeature> FEATURE_5 = new ArrayList<>(
@@ -38,7 +42,7 @@ public class Trainer {
                     new HaarFeature(5, 10, 8))
     );
 
-    public static List<WeakHaarClassifier> trainFaces(){
+    public static List<WeakHaarClassifier> trainFaces() {
         ArrayList<WeakHaarClassifier> weakHaarClassifiers = new ArrayList<>();
         ArrayList<int[][]> imageArray = new ArrayList<>();
 
@@ -46,7 +50,7 @@ public class Trainer {
 //        File folder = new File("res/faces/test");
         File[] files = folder.listFiles();
 
-        for (File file: files) {
+        for (File file : files) {
             BufferedImage bImage = null;
             try {
                 bImage = ImageIO.read(file);
@@ -57,16 +61,16 @@ public class Trainer {
         }
 
         long time = System.currentTimeMillis();
-        for (int[][] image: imageArray){
+        for (int[][] image : imageArray) {
             weakHaarClassifiers.add(new WeakHaarClassifier(train(image, 1)));
         }
 
-        System.out.println("Time Taken to train " + imageArray.size() + " number of image is " + ((System.currentTimeMillis() - time)/1000.0) + "s");
+        System.out.println("Time Taken to train " + imageArray.size() + " number of image is " + ((System.currentTimeMillis() - time) / 1000.0) + "s");
 
         return weakHaarClassifiers;
     }
 
-    public static List<HaarFeature> train(int[][] inputI, int type){
+    public static List<HaarFeature> train(int[][] inputI, int type) {
         List<HaarFeature> featureList = new ArrayList<>();
 
         int h = inputI.length;
@@ -74,20 +78,20 @@ public class Trainer {
         int[][] integralI = new int[h][w];
         ImageUtils.buildIntegralImage(inputI, integralI, w, h);
 
-        if (type == FEATURE_TYPE_1){
+        if (type == FEATURE_TYPE_1) {
             for (HaarFeature feature : FEATURE_1) {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
                 HaarFeature result = new HaarFeature(1, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
-                    int y = (integralI[0].length - featW*2)/2;
+                    int y = (integralI[0].length - featW * 2) / 2;
                     // sum1 of pixels on S1
 
-                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH) ;
-                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH) ;
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH);
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH);
 
-                    result.add(sum1-sum2);
+                    result.add(sum1 - sum2);
                 }
                 featureList.add(result);
             }
@@ -98,13 +102,30 @@ public class Trainer {
                 HaarFeature result = new HaarFeature(1, featW, featH);
                 for (int x = 0; x < h - featH; x++) {
                     // assume centered.
-                    int y = (integralI[0].length - featW*2)/2;
+                    int y = (integralI[0].length - featW * 2) / 2;
                     // sum1 of pixels on S1
-                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH) ;
-                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH) ;
-                    int sum3 = ImageUtils.sumIntegralImage(integralI, x, y + featW * 2, featW, featH) ;
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH);
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x, y + featW, featW, featH);
+                    int sum3 = ImageUtils.sumIntegralImage(integralI, x, y + featW * 2, featW, featH);
 
-                    result.add(sum1-sum2+sum3);
+                    result.add(sum1 - sum2 + sum3);
+                }
+                featureList.add(result);
+            }
+        } else if (type == FEATURE_TYPE_3) {
+            for (HaarFeature feature : FEATURE_3) {
+                int featW = feature.getWidth();
+                int featH = feature.getHeight();
+                HaarFeature result = new HaarFeature(3, featW, featH);
+                for (int x = 0; x < h - (featH * 2 - 1); x++) {
+                    // assume centered.
+                    int y = (integralI[0].length - featW * 2) / 2;
+                    // sum1 of pixels on S1
+
+                    int sum1 = ImageUtils.sumIntegralImage(integralI, x, y, featW, featH);
+                    int sum2 = ImageUtils.sumIntegralImage(integralI, x + featH, y, featW, featH);
+
+                    result.add(sum1 - sum2);
                 }
                 featureList.add(result);
             }
@@ -113,7 +134,7 @@ public class Trainer {
                 int featW = feature.getWidth();
                 int featH = feature.getHeight();
                 HaarFeature result = new HaarFeature(1, featW, featH);
-                for (int x = 0; x < h - featH; x++) {
+                for (int x = 0; x < h - (featH * 2 - 1); x++) {
                     // assume centered.
                     int y = (integralI[0].length - featW * 2) / 2;
 
