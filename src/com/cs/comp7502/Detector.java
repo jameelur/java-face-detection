@@ -43,10 +43,15 @@ public class Detector {
             for (int x = 0; x <= height - winSize; x++) {
                 for (int y = 0; y <= width - winSize; y++) {
                     int[][] slidingWindow = new int[winSize][winSize];
+
                     for (int i = 0; i < winSize; i++) {
                         slidingWindow[i] = Arrays.copyOfRange(image[x + i], y, y + winSize);
                     }
-                    boolean faceExists = doesFaceExist(slidingWindow, trainedClassifiers, finalThreshold, similarityThreshold);
+
+                    if (doesFaceExist(slidingWindow, trainedClassifiers, finalThreshold, similarityThreshold)) {
+                        Rectangle faceArea = new Rectangle(x, y, winSize, winSize);
+                        rectangles.add(faceArea);
+                    }
                 }
             }
         }
