@@ -22,7 +22,7 @@ public class Detector {
         this.cClassifier = cClassifier;
     }
 
-    public java.util.List<Rectangle> detectFaces(int[][] input, ColourUtils.Grayscale type, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
+    public java.util.List<Rectangle> detectFaces(int[][] input, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
         ArrayList<Rectangle> rectangles = new ArrayList<>();
 
         int width = input.length;
@@ -33,7 +33,7 @@ public class Detector {
 
         // calculate intensity integral image
         // calculate intensity squared integral image
-        setIntensity(input, image, image2, type);
+        ImageUtils.buildIntegralImage(image, image2, width, height);
 
         // find max scale
         // for each possible window
@@ -46,7 +46,7 @@ public class Detector {
                     for (int i = 0; i < winSize; i++) {
                         slidingWindow[i] = Arrays.copyOfRange(image[x + i], y, y + winSize);
                     }
-                    doesFaceExist(image, trainedClassifiers, finalThreshold, similarityThreshold);
+                    boolean faceExists = doesFaceExist(slidingWindow, trainedClassifiers, finalThreshold, similarityThreshold);
                 }
             }
         }
