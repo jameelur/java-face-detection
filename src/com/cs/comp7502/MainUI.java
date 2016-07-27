@@ -12,8 +12,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import java.awt.Graphics2D;
+import java.awt.Color;
+import java.awt.Graphics;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -37,6 +42,9 @@ public class MainUI extends JFrame {
     private static CascadingClassifier openCVEyes;
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
+    ArrayList<Rectangle> rectangles = new ArrayList<>();
+    int[][] image;
+
 
     public MainUI() {
         super("COMP 7502 - Project");
@@ -94,6 +102,11 @@ public class MainUI extends JFrame {
 
             viewportPopup.addSeparator();
 
+            JMenuItem gradientImageMenuItem = new JMenuItem("Detect Face");
+            gradientImageMenuItem.addActionListener(this);
+            gradientImageMenuItem.setActionCommand("drawRect");
+            viewportPopup.add(gradientImageMenuItem);
+
             JMenuItem exitMenuItem = new JMenuItem("exit");
             exitMenuItem.addActionListener(this);
             exitMenuItem.setActionCommand("exit");
@@ -128,15 +141,17 @@ public class MainUI extends JFrame {
                     File file = fc.getSelectedFile();
                     try {
                         long start = System.nanoTime();
-                        BufferedImage bImage = ImageIO.read(file);
+                        img = ImageIO.read(file);
+
+                        BufferedImage bImage = img;
 
                         int[][] image = ImageUtils.buildGrayscaleImageArray(bImage);
 
                         // retrieve weak haar classifier
-                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
+//                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
 
                         // for each classifier perform a comparison
-//                        SimilarityComputation.avgFeatureSimilarity(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
+//                        SimilarityComputation.voting(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
 
                         double seconds = (System.nanoTime() - start) / 1000000000.0;
                         infoLabel.setText(seconds+"");
@@ -144,7 +159,27 @@ public class MainUI extends JFrame {
                         ee.printStackTrace();
                     }
                 }
-            } else if (e.getActionCommand().equals("exit")) {
+            } else if (e.getActionCommand().equals("drawRect")){
+                //for testing color and line thickness
+                Rectangle faceArea = new Rectangle(50, 50, 70, 70);
+                Rectangle faceArea2 = new Rectangle(100, 100, 90, 90);
+                rectangles.add(faceArea);
+                rectangles.add(faceArea2);
+
+                //too scared to run or test this bit
+//                Detector detector = new Detector();
+//                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, 0.6, 0.6);
+                if (rectangles!=null) {
+                    Graphics2D drawing = img.createGraphics();
+                    drawing.setColor(Color.GREEN);
+                    float thickness = 3f;
+                    drawing.setStroke(new BasicStroke(thickness));
+                    for (Rectangle r : rectangles) {
+                        drawing.drawRect(r.x, r.y, r.height, r.width);
+                    }
+                }
+            }
+            else if (e.getActionCommand().equals("exit")) {
                 System.exit(0);
             }
             viewportPopup = null;
