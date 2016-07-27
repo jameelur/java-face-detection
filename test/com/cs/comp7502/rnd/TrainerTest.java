@@ -25,11 +25,24 @@ public class TrainerTest {
         List<WeakHaarClassifier> trainedClassifiers = Trainer.trainFaces();
 
         ArrayList<WeakHaarClassifier> weakHaarClassifiers = new ArrayList<>();
-        ArrayList<int[][]> imageArray = new ArrayList<>();
 
 //        File folder = new File("res/faces/24by24faces");
-        File folder = new File("res/faces/24by24faces");
-        File[] files = folder.listFiles();
+        File faceFolder = new File("../24by24faces");
+        File nonfaceFolder = new File("../24by24nonfaces");
+
+        File[] faceFiles = faceFolder.listFiles();
+        File[] nonfaceFiles = nonfaceFolder.listFiles();
+
+        // for face files
+        compareFeatures("results_face", faceFiles, trainedClassifiers);
+        compareFeatures("results_nonface", nonfaceFiles, trainedClassifiers);
+        // verify
+
+        System.out.println("Time Taken to train: " + ((System.currentTimeMillis() - time) / 1000.0) + "s");
+    }
+
+    private void compareFeatures(String fileprefix, File[] files, List<WeakHaarClassifier> trainedClassifiers) {
+        ArrayList<int[][]> imageArray = new ArrayList<>();
 
         for (File file: files) {
             BufferedImage bImage = null;
@@ -41,24 +54,26 @@ public class TrainerTest {
             imageArray.add(ImageUtils.buildGrayscaleImageArray(bImage));
         }
 
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter("results_feature2_faces.txt", "UTF-8");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        for (int[][] image: imageArray){
-            List<HaarFeature> computedFeatures = Trainer.train(image, 2);
-            SimilarityComputation.voting(writer,new WeakHaarClassifier(computedFeatures), trainedClassifiers, 0.6);
-        }
+        // for all 5 features
+        char[] types = new char[] {'a','b','c','d','e'};
+        for (int i = 1; i < 6; i++) {
+            PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(fileprefix + "_type_" + types[i] + ".txt", "UTF-8");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            for (int[][] image : imageArray) {
+                List<HaarFeature> computedFeatures = Trainer.train(image, 2);
+                SimilarityComputation.voting(writer, new WeakHaarClassifier(computedFeatures), trainedClassifiers, 0.6);
+            }
 
-        writer.close();
-        // verify
-
-        System.out.println("Time Taken to train: " + ((System.currentTimeMillis() - time) / 1000.0) + "s");
+            writer.close();
+        }
     }
+
 
     @Test
     public void train_whenFeature1() throws Exception {
@@ -156,6 +171,48 @@ public class TrainerTest {
         }
         for (int value: haarFeature2.getFeatureVector()){
             assertEquals(0, value);
+        }
+    }
+
+    @Test
+    public void train_whenFeature4() throws Exception {
+        // prepare
+        int[][] testI = new int[24][24];
+        for (int i = 0; i < 24; i++){
+            int[] col = new int[24];
+            Arrays.fill(col, 2);
+            testI[i] = col;
+        }
+
+        // execute
+        List<HaarFeature> train = Trainer.train(testI, 4);
+
+        // verify
+        HaarFeature haarFeature1 = train.get(0);
+        HaarFeature haarFeature2 = train.get(1);
+        HaarFeature haarFeature3 = train.get(2);
+
+        assertEquals(12, haarFeature1.getWidth());
+        assertEquals(4, haarFeature1.getHeight());
+
+        assertEquals(16, haarFeature2.getWidth());
+        assertEquals(5, haarFeature2.getHeight());
+
+        assertEquals(20, haarFeature3.getWidth());
+        assertEquals(6, haarFeature3.getHeight());
+
+        assertEquals(13, haarFeature1.getFeatureVector().size());
+        assertEquals(10, haarFeature2.getFeatureVector().size());
+        assertEquals(7, haarFeature3.getFeatureVector().size());
+
+        for (int value: haarFeature1.getFeatureVector()){
+            assertEquals(96, value);
+        }
+        for (int value: haarFeature2.getFeatureVector()){
+            assertEquals(120, value);
+        }
+        for (int value: haarFeature3.getFeatureVector()){
+            assertEquals(144, value);
         }
     }
 

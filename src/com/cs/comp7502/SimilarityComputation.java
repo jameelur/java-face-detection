@@ -90,14 +90,14 @@ public class SimilarityComputation {
 
 //            System.out.print("Positive Vote for feature " + featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
 //            System.out.print(featureTypeIndex + ": " + newPosVote + " / " + numOfRefFace);
-            writer.print(featureTypeIndex + "_ " + newAddedSimilarity / numOfRefFace + "_");
+            if (writer != null) writer.print(featureTypeIndex + "_ " + newAddedSimilarity / numOfRefFace + "_");
             sumOfSimilarity += newAddedSimilarity;
         }
 
         double average = sumOfSimilarity / (numOfRefFace * numOfFeatuerType);
 
 //        System.out.println("\n The overall positive voting rate: " + rate);
-        writer.println(" _ The average similarity _ " + average);
+        if (writer != null) writer.println(" _ The average similarity _ " + average);
 
         return average;
     }
