@@ -18,8 +18,9 @@ public class SimilarityComputation {
 
     public static double cosSimilarity(List<Integer> vector1, List<Integer> vector2) {
         if (vector1.size() != vector2.size()) {
-            System.out.println("Two vectors have different length");
-            return 0.0;
+            throw new RuntimeException("Two vectors have different length");
+//            System.out.println("Two vectors have different length");
+//            return 0.0;
         }
 
         int innerDot = 0;
@@ -80,7 +81,7 @@ public class SimilarityComputation {
 
             double similarity = cosSimilarity(queryFeatureVector, referenceFeatureVector);
 
-            writer.println(similarity);
+            if (writer != null) writer.println(similarity);
 
             sumOfSimilarity += similarity;
         }

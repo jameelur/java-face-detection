@@ -28,24 +28,24 @@ public class Detector {
         int width = input.length;
         int height = input[0].length;
 
-        int[][] image = new int[height][width];
-        int[][] image2 = new int[height][width];
+//        int[][] image = new int[height][width];
+//        int[][] image2 = new int[height][width];
 
         // calculate intensity integral image
         // calculate intensity squared integral image
-        ImageUtils.buildIntegralImage(image, image2, width, height);
+//        ImageUtils.buildIntegralImage(image, image2, width, height);
 
         // find max scale
         // for each possible window
         // run through cascading com.cs.comp7502.classifier and gt true or false
         // if true add the location to the image and the size of the window
         for (int winSize = 24; (winSize <= width) && (winSize <= height); winSize *= 2) { // enlarge the size of sliding window twice each loop
-            for (int x = 0; x <= height - winSize; x++) {
-                for (int y = 0; y <= width - winSize; y++) {
+            for (int x = 0; x <= height - winSize; x+= 12) {
+                for (int y = 0; y <= width - winSize; y+= 12) {
                     int[][] slidingWindow = new int[winSize][winSize];
 
                     for (int i = 0; i < winSize; i++) {
-                        slidingWindow[i] = Arrays.copyOfRange(image[x + i], y, y + winSize);
+                        slidingWindow[i] = Arrays.copyOfRange(input[x + i], y, y + winSize);
                     }
 
                     if (doesFaceExist(slidingWindow, trainedClassifiers, finalThreshold, similarityThreshold)) {
@@ -61,16 +61,16 @@ public class Detector {
 
     private boolean doesFaceExist(int[][] image, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
         List<WHaarClassifier> computedFeatures = Trainer.train(image);
-        int positiveCount = 0;
-        int negativeCount = 0;
+        double positiveCount = 0;
+        double negativeCount = 0;
         for (WHaarClassifier feature : computedFeatures){
             double similarity = SimilarityComputation.avgFeatureSimilarity(null, feature, trainedClassifiers.get(feature.getKey()));
             if (similarity > similarityThreshold) positiveCount++;
             else negativeCount++;
         }
 
-        System.out.print("# of Positive Count: " + positiveCount);
-        System.out.println(" # of Negative Count: " + negativeCount);
+//        System.out.print("# of Positive Count: " + positiveCount);
+//        System.out.println(" # of Negative Count: " + negativeCount);
 
         if (positiveCount / (positiveCount + negativeCount) > finalThreshold) return true;
         return false;

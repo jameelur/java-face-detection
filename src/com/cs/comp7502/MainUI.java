@@ -146,7 +146,7 @@ public class MainUI extends JFrame {
 
                         BufferedImage bImage = img;
 
-                        int[][] image = ImageUtils.buildGrayscaleImageArray(bImage);
+                        image = ImageUtils.buildGrayscaleImageArray(bImage);
 
                         // retrieve weak haar classifier
 //                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
@@ -195,14 +195,15 @@ public class MainUI extends JFrame {
                     }
                 }
                 //too scared to run or test this bit
-//                Detector detector = new Detector();
-//                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
+                Detector detector = new Detector();
+                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
+                System.out.println("# of faces detected: " + rectangles.size());
 
                 //for testing color and line thickness
-                Rectangle faceArea = new Rectangle(50, 50, 70, 70);
-                Rectangle faceArea2 = new Rectangle(235, 220, 110, 110);
-                rectangles.add(faceArea);
-                rectangles.add(faceArea2);
+//                Rectangle faceArea = new Rectangle(50, 50, 70, 70);
+//                Rectangle faceArea2 = new Rectangle(235, 220, 110, 110);
+//                rectangles.add(faceArea);
+//                rectangles.add(faceArea2);
 
                 if (rectangles!=null) {
                     Graphics2D drawing = img.createGraphics();
