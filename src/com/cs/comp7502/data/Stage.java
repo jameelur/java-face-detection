@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Stage {
 
     private double stageThreshold;
-    private ArrayList<WeakClassifier> classifierList = new ArrayList<>();
+    private ArrayList<Feature> classifierList = new ArrayList<>();
 
     public double getStageThreshold() {
         return stageThreshold;
@@ -15,11 +15,11 @@ public class Stage {
         this.stageThreshold = stageThreshold;
     }
 
-    public ArrayList<WeakClassifier> getClassifierList() {
+    public ArrayList<Feature> getClassifierList() {
         return classifierList;
     }
 
-    public void setClassifierList(ArrayList<WeakClassifier> classifierList) {
+    public void setClassifierList(ArrayList<Feature> classifierList) {
         this.classifierList = classifierList;
     }
 }
