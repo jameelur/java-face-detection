@@ -3,9 +3,11 @@ package com.cs.comp7502;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 public class Adaboost {
 
@@ -35,13 +37,26 @@ public class Adaboost {
         return stage;
     }
 
-
-    public Feature findBestStump(Feature feature, List<TrainedImage> images) {
-        // find best stump
-        // input: one feature, a set of training samples
+    // find best stump
+    // input: one feature, a set of training samples
+    public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumPos, double sumNeg) {
         // 1. calculate feature values for all training samples based on given feature
 
+        for (TrainedImage datum: data){
+            datum.setFeatureValue(0);
+            int[][] image = new int[0][];
+            try {
+                BufferedImage img = ImageIO.read(datum.getFile());
+                int[][] tempImg = ImageUtils.buildImageArray(img, true);
+                ImageUtils.buildIntegralImage(image, tempImg, tempImg[0].length, tempImg.length);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            datum.setFeatureValue(feature.getValue(image));
+        }
+
         // 2. sort the feature value list
+        Collections.sort(data);
 
         // 3. pass over the feature value list to find best threshold
         // for each feature value we calculate the error for this threshold
@@ -58,15 +73,33 @@ public class Adaboost {
         // set threshold
         // set error
         // set polarity
-        return feature;
+        return new BestStump(feature, data);
     }
 
+    class BestStump {
+        private Feature feature;
+        private List<TrainedImage> trainedImages;
 
+        public BestStump(Feature feature, List<TrainedImage> trainedImages) {
+            this.feature = feature;
+            this.trainedImages = trainedImages;
+        }
 
-    class TrainedImage {
+        public Feature getFeature() {
+            return feature;
+        }
+
+        public List<TrainedImage> getTrainedImages() {
+            return trainedImages;
+        }
+    }
+
+    class TrainedImage implements Comparable<TrainedImage>{
         int label;
         File file;
         double weight;
+
+        int featureValue;
 
         public TrainedImage(int label, File file) {
             this.label = label;
@@ -95,6 +128,19 @@ public class Adaboost {
 
         public void setWeight(double weight) {
             this.weight = weight;
+        }
+
+        public int getFeatureValue() {
+            return featureValue;
+        }
+
+        public void setFeatureValue(int featureValue) {
+            this.featureValue = featureValue;
+        }
+
+        @Override
+        public int compareTo(TrainedImage o) {
+            return Integer.compare(this.getFeatureValue(), o.featureValue);
         }
     }
 }

@@ -51,7 +51,7 @@ public class TrainerTest {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            imageArray.add(ImageUtils.buildGrayscaleImageArray(bImage));
+            imageArray.add(ImageUtils.buildImageArray(bImage, true));
         }
 
 

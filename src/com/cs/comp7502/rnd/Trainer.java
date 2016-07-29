@@ -35,7 +35,7 @@ public class Trainer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            imageArray.add(ImageUtils.buildGrayscaleImageArray(bImage));
+            imageArray.add(ImageUtils.buildImageArray(bImage, true));
         }
 
         long time = System.currentTimeMillis();
@@ -97,7 +97,7 @@ public class Trainer {
 
         for (int featH = 1; featH <= (maxH / rowCount(type)); featH++) {
             for (int featW = 1; featW <= (maxW / colCount(type)); featW++) {
-                WHaarClassifier result = new WHaarClassifier(1, count, featW, featH);
+                WHaarClassifier result = new WHaarClassifier(type, count, featW, featH);
                 List<Integer> featureVector = new ArrayList<>();
 
                 for (int x = 0; x < imageH - (featH * windowScale * windowCountH - 1); x += windowScale) {
