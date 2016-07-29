@@ -40,8 +40,8 @@ public class Detector {
         // run through cascading com.cs.comp7502.classifier and gt true or false
         // if true add the location to the image and the size of the window
         for (int winSize = 24; (winSize <= width) && (winSize <= height); winSize *= 2) { // enlarge the size of sliding window twice each loop
-            for (int x = 0; x <= height - winSize; x+= 12) {
-                for (int y = 0; y <= width - winSize; y+= 12) {
+            for (int x = 0; x <= height - winSize; x+= winSize/2) {
+                for (int y = 0; y <= width - winSize; y+= winSize/2) {
                     int[][] slidingWindow = new int[winSize][winSize];
 
                     for (int i = 0; i < winSize; i++) {
@@ -61,9 +61,11 @@ public class Detector {
 
     private boolean doesFaceExist(int[][] image, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
         List<WHaarClassifier> computedFeatures = Trainer.train(image);
+
         double positiveCount = 0;
         double negativeCount = 0;
         for (WHaarClassifier feature : computedFeatures){
+//            if (feature.getType() != 1 && feature.getType() != 2) continue;
             double similarity = SimilarityComputation.avgFeatureSimilarity(null, feature, trainedClassifiers.get(feature.getKey()));
             if (similarity > similarityThreshold) positiveCount++;
             else negativeCount++;

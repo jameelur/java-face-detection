@@ -11,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,7 @@ public class MainUI extends JFrame {
     private static CascadingClassifier openCVEyes;
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
+    private static Detector detector;
     ArrayList<Rectangle> rectangles = new ArrayList<>();
     int[][] image;
 
@@ -61,7 +64,9 @@ public class MainUI extends JFrame {
         try {
             initCascadingClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
         new MainUI();
     }
 
@@ -69,10 +74,12 @@ public class MainUI extends JFrame {
 //        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
 
         weakHaarClassifiers = Trainer.trainFaces();
+        detector = new Detector();
     }
 
     private class ImagePanel extends JPanel implements MouseListener, ActionListener, MouseMotionListener {
         private BufferedImage img;
+        private BufferedImage originalImg;
         int row;
         int column;
 
@@ -141,12 +148,12 @@ public class MainUI extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
                     try {
+                        System.out.println("loading image from path: " + file.getAbsolutePath());
                         long start = System.nanoTime();
                         img = ImageIO.read(file);
+                        originalImg = img;
 
-                        BufferedImage bImage = img;
-
-                        image = ImageUtils.buildGrayscaleImageArray(bImage);
+                        image = ImageUtils.buildGrayscaleImageArray(img);
 
                         // retrieve weak haar classifier
 //                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
@@ -162,6 +169,7 @@ public class MainUI extends JFrame {
                 }
             } else if (e.getActionCommand().equals("drawRect")){
 
+                img = deepClone(originalImg);
                 double finalThreshold = 0.6;
                 double similarityThreshold = 0.6;
                 boolean notOk = true;
@@ -195,9 +203,10 @@ public class MainUI extends JFrame {
                     }
                 }
                 //too scared to run or test this bit
-                Detector detector = new Detector();
+                long time = System.currentTimeMillis();
                 rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
-                System.out.println("# of faces detected: " + rectangles.size());
+                long doneTime = (System.currentTimeMillis() - time) / 60000;
+                System.out.println("time: " + doneTime + " mins, ft: " + finalThreshold +", st: " +similarityThreshold + ", # of faces detected: " + rectangles.size());
 
                 //for testing color and line thickness
 //                Rectangle faceArea = new Rectangle(50, 50, 70, 70);
@@ -228,6 +237,13 @@ public class MainUI extends JFrame {
             column = e.getX();
             row = e.getY();
             infoLabel.setText("("+row+","+column+")");
+        }
+
+        public BufferedImage deepClone(BufferedImage bImage) {
+            ColorModel cModel = bImage.getColorModel();
+            WritableRaster raster = bImage.copyData(null);
+            boolean isAlphaPremultiplied = cModel.isAlphaPremultiplied();
+            return new BufferedImage(cModel, raster, isAlphaPremultiplied, null);
         }
     }
 }

@@ -18,7 +18,7 @@ public class SimilarityComputation {
 
     public static double cosSimilarity(List<Integer> vector1, List<Integer> vector2) {
         if (vector1.size() != vector2.size()) {
-            throw new RuntimeException("Two vectors have different length");
+            throw new RuntimeException("Two vectors have different length, vector1.size(): " + vector1.size() + ", vector2.size(): " + vector2.size());
 //            System.out.println("Two vectors have different length");
 //            return 0.0;
         }

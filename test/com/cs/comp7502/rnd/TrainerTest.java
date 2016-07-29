@@ -150,26 +150,12 @@ public class TrainerTest {
         List<WHaarClassifier> train = Trainer.train(testI, 1);
 
         // verify
-        WHaarClassifier classifier1 = train.get(0);
-        WHaarClassifier classifier2 = train.get(1);
-
-        assertEquals("1_1", classifier1.getKey());
-        assertEquals("1_2", classifier2.getKey());
-
-        assertEquals(6, classifier1.getWidth());
-        assertEquals(6, classifier2.getWidth());
-        assertEquals(3, classifier1.getHeight());
-        assertEquals(6, classifier2.getHeight());
-
-        assertEquals(21, classifier1.getFeatureVector().size());
-        assertEquals(18, classifier2.getFeatureVector().size());
-
-        for (int value: classifier1.getFeatureVector()){
-            assertEquals(0, value);
+        int totalFeatureSum = 0;
+        for (WHaarClassifier classifier : train){
+            totalFeatureSum += classifier.getFeatureVector().size();
         }
-        for (int value: classifier2.getFeatureVector()){
-            assertEquals(0, value);
-        }
+
+        assertEquals(43200, totalFeatureSum);
     }
 
     @Test
@@ -186,26 +172,12 @@ public class TrainerTest {
         List<WHaarClassifier> train = Trainer.train(testI, 2);
 
         // verify
-        WHaarClassifier classifier1 = train.get(0);
-        WHaarClassifier classifier2 = train.get(1);
-
-        assertEquals("2_1", classifier1.getKey());
-        assertEquals("2_2", classifier2.getKey());
-
-        assertEquals(4, classifier1.getWidth());
-        assertEquals(4, classifier2.getWidth());
-        assertEquals(3, classifier1.getHeight());
-        assertEquals(6, classifier2.getHeight());
-
-        assertEquals(21, classifier1.getFeatureVector().size());
-        assertEquals(18, classifier2.getFeatureVector().size());
-
-        for (int value: classifier1.getFeatureVector()){
-            assertEquals(24, value);
+        int totalFeatureSum = 0;
+        for (WHaarClassifier classifier : train){
+            totalFeatureSum += classifier.getFeatureVector().size();
         }
-        for (int value: classifier2.getFeatureVector()){
-            assertEquals(48, value);
-        }
+
+        assertEquals(27600, totalFeatureSum);
     }
 
     @Test
@@ -222,26 +194,12 @@ public class TrainerTest {
         List<WHaarClassifier> train = Trainer.train(testI, 3);
 
         // verify
-        WHaarClassifier classifier1 = train.get(0);
-        WHaarClassifier classifier2 = train.get(1);
-
-        assertEquals("3_1", classifier1.getKey());
-        assertEquals("3_2", classifier2.getKey());
-
-        assertEquals(6, classifier1.getWidth());
-        assertEquals(12, classifier2.getWidth());
-        assertEquals(6, classifier1.getHeight());
-        assertEquals(6, classifier2.getHeight());
-
-        assertEquals(13, classifier1.getFeatureVector().size());
-        assertEquals(13, classifier2.getFeatureVector().size());
-
-        for (int value: classifier1.getFeatureVector()){
-            assertEquals(0, value);
+        int totalFeatureSum = 0;
+        for (WHaarClassifier classifier : train){
+            totalFeatureSum += classifier.getFeatureVector().size();
         }
-        for (int value: classifier2.getFeatureVector()){
-            assertEquals(0, value);
-        }
+
+        assertEquals(43200, totalFeatureSum);
     }
 
     @Test
@@ -258,36 +216,12 @@ public class TrainerTest {
         List<WHaarClassifier> train = Trainer.train(testI, 4);
 
         // verify
-        WHaarClassifier classifier1 = train.get(0);
-        WHaarClassifier classifier2 = train.get(1);
-        WHaarClassifier classifier3 = train.get(2);
-
-        assertEquals("4_1", classifier1.getKey());
-        assertEquals("4_2", classifier2.getKey());
-        assertEquals("4_3", classifier3.getKey());
-
-        assertEquals(12, classifier1.getWidth());
-        assertEquals(4, classifier1.getHeight());
-
-        assertEquals(16, classifier2.getWidth());
-        assertEquals(5, classifier2.getHeight());
-
-        assertEquals(20, classifier3.getWidth());
-        assertEquals(6, classifier3.getHeight());
-
-        assertEquals(13, classifier1.getFeatureVector().size());
-        assertEquals(10, classifier2.getFeatureVector().size());
-        assertEquals(7, classifier3.getFeatureVector().size());
-
-        for (int value: classifier1.getFeatureVector()){
-            assertEquals(96, value);
+        int totalFeatureSum = 0;
+        for (WHaarClassifier classifier : train){
+            totalFeatureSum += classifier.getFeatureVector().size();
         }
-        for (int value: classifier2.getFeatureVector()){
-            assertEquals(120, value);
-        }
-        for (int value: classifier3.getFeatureVector()){
-            assertEquals(144, value);
-        }
+
+        assertEquals(27600, totalFeatureSum);
     }
 
     @Test
@@ -304,37 +238,12 @@ public class TrainerTest {
         List<WHaarClassifier> train = Trainer.train(testI, 5);
 
         // verify
-        WHaarClassifier classifier1 = train.get(0);
-        WHaarClassifier classifier2 = train.get(1);
-        WHaarClassifier classifier3 = train.get(2);
-
-
-        assertEquals("5_1", classifier1.getKey());
-        assertEquals("5_2", classifier2.getKey());
-        assertEquals("5_3", classifier3.getKey());
-
-        assertEquals(6, classifier1.getWidth());
-        assertEquals(4, classifier1.getHeight());
-
-        assertEquals(8, classifier2.getWidth());
-        assertEquals(6, classifier2.getHeight());
-
-        assertEquals(10, classifier3.getWidth());
-        assertEquals(8, classifier3.getHeight());
-
-        assertEquals(17, classifier1.getFeatureVector().size());
-        assertEquals(13, classifier2.getFeatureVector().size());
-        assertEquals(9, classifier3.getFeatureVector().size());
-
-        for (int value: classifier1.getFeatureVector()){
-            assertEquals(0, value);
+        int totalFeatureSum = 0;
+        for (WHaarClassifier classifier : train){
+            totalFeatureSum += classifier.getFeatureVector().size();
         }
-        for (int value: classifier2.getFeatureVector()){
-            assertEquals(0, value);
-        }
-        for (int value: classifier3.getFeatureVector()){
-            assertEquals(0, value);
-        }
+
+        assertEquals(20736, totalFeatureSum);
     }
 
 }
