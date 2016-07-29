@@ -22,6 +22,7 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import javax.swing.ImageIcon;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -110,10 +111,15 @@ public class MainUI extends JFrame {
 
             viewportPopup.addSeparator();
 
-            JMenuItem gradientImageMenuItem = new JMenuItem("Detect Face");
-            gradientImageMenuItem.addActionListener(this);
-            gradientImageMenuItem.setActionCommand("drawRect");
-            viewportPopup.add(gradientImageMenuItem);
+            JMenuItem integralImageMenuItem = new JMenuItem("Calculate Integral Image");
+            integralImageMenuItem.addActionListener(this);
+            integralImageMenuItem.setActionCommand("drawIntegral");
+            viewportPopup.add(integralImageMenuItem);
+
+            JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face");
+            detectFaceMenuItem.addActionListener(this);
+            detectFaceMenuItem.setActionCommand("drawRect");
+            viewportPopup.add(detectFaceMenuItem);
 
             JMenuItem exitMenuItem = new JMenuItem("exit");
             exitMenuItem.addActionListener(this);
@@ -167,6 +173,41 @@ public class MainUI extends JFrame {
                         ee.printStackTrace();
                     }
                 }
+            } else if (e.getActionCommand().equals("drawIntegral")){
+                img = deepClone(originalImg);
+                if (img!=null) {
+                    JFrame frame = new JFrame();
+                    JLabel jl = new JLabel();
+                    frame.setTitle("Integral Image");
+
+                    //TODO
+                    image = ImageUtils.buildImageArray(img, true);
+                    int h = image.length;
+                    int w = image[0].length;
+                    int[][] integralI = new int[h][w];
+                    ImageUtils.buildIntegralImage(image, integralI, w, h);
+                    BufferedImage bI = new BufferedImage(integralI[0].length, integralI.length, BufferedImage.TYPE_INT_RGB);
+                    int max = integralI[integralI.length-1][integralI[0].length-1];
+
+                    // setting 2D array into bufferedimage http://stackoverflow.com/questions/21576096/convert-a-2d-array-of-doubles-to-a-bufferedimage
+                    for (int y = 0; y <integralI[0].length; y++) {
+                        for (int x = 0; x <integralI.length; x++) {
+                            integralI[x][y] = (int)((integralI[x][y] * 255.0/(max)));
+                            int value = integralI[x][y] << 16 | integralI[x][y] << 8 | integralI[x][y];
+                            bI.setRGB(y, x, value);
+                        }
+                    }
+                    ImageIcon ii = new ImageIcon(bI);
+                    jl.setIcon(ii);
+                    frame.add(jl);
+                    frame.pack();
+                    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    frame.setResizable(false);
+                    frame.setVisible(true);
+                }
+
+
+
             } else if (e.getActionCommand().equals("drawRect")){
 
                 img = deepClone(originalImg);
