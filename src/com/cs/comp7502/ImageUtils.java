@@ -20,14 +20,23 @@ public class ImageUtils {
         }
     }
 
-    public static int[][] buildGrayscaleImageArray(BufferedImage bImage){
-        Raster raster = bImage.getData();
-        int w = raster.getWidth();
-        int h = raster.getHeight();
-        int image[][] = new int[w][h];
-        for (int x = 0; x < h; x++) {
-            for (int y = 0; y < w; y++) {
-                image[x][y] = raster.getSample(y, x, 0);
+    public static int[][] buildImageArray(BufferedImage input, boolean isGrayscale){
+        int w = input.getWidth();
+        int h = input.getHeight();
+        int image[][] = new int[h][w];
+        if (isGrayscale) {
+            Raster raster = input.getData();
+            for (int x = 0; x < h; x++) {
+                for (int y = 0; y < w; y++) {
+                    image[x][y] = raster.getSample(y, x, 0);
+                }
+            }
+        } else {
+            for (int x = 0; x < h; x++) {
+                for (int y = 0; y < w; y++) {
+                    int rgb = input.getRGB(y, x);
+                    image[x][y] = ColourUtils.convertToG((rgb & 0x00ff0000) >> 16, (rgb & 0x0000ff00) >> 8, (rgb & 0x000000ff), ColourUtils.Grayscale.LUMINANCE);
+                }
             }
         }
         return image;

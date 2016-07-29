@@ -153,7 +153,7 @@ public class MainUI extends JFrame {
                         img = ImageIO.read(file);
                         originalImg = img;
 
-                        image = ImageUtils.buildGrayscaleImageArray(img);
+                        image = ImageUtils.buildImageArray(img, false);
 
                         // retrieve weak haar classifier
 //                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
