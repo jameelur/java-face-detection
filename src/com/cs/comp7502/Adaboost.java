@@ -62,8 +62,8 @@ public class Adaboost {
         Stage stage = new Stage();
         int maxTrainingRounds = features.size();
         List<TrainedImage> images = new ArrayList<>();
-        double posWeight = 1.0 / 2.0 * faces.length;
-        double negWeight = 1.0 / 2.0 * nonFaces.length;
+        double posWeight = 1.0 / (2.0 * faces.length);
+        double negWeight = 1.0 / (2.0 * nonFaces.length);
         double sumOfPosWeight = 0.5;
         double sumOfNegWeight = 0.5;
         ArrayList<Feature> decisionStumps = new ArrayList<>();
@@ -94,6 +94,7 @@ public class Adaboost {
             // 2. calculate the beta = error / (1 - error)
             // 3. calculate the alpha = log(1 / beta), but I am not sure the base of the log
             double error = bestStump.getFeature().getError();
+            if (error <= 0) error = 0.001;
             double beta = error / (1 - error);
             double alpha = Math.log10(1.0 / beta);
             bestStump.getFeature().setWeight(alpha);
@@ -108,9 +109,11 @@ public class Adaboost {
             int polarity = bestStump.getFeature().getPolarity();
 
             for (TrainedImage image : images) {
-                if (((double) polarity * image.featureValue) < (polarity * threshold)) {
+
+                boolean isFace = ((double) polarity * image.featureValue) < (polarity * threshold);
+                if (isFace && image.getLabel() == FACE || !isFace && image.getLabel() == NON_FACE){
                     double oldWeight = image.weight;
-                    double newWeight = oldWeight * beta;
+                    double newWeight = image.weight * beta;
                     image.weight = newWeight;
 
                     if (image.label == FACE)
@@ -162,9 +165,13 @@ public class Adaboost {
             }
 
 
-            double ePos = sumPosBelowT + (sumOfNegWeight - sumNegBelowT);
-            double eNeg = sumNegBelowT + (sumOfPosWeight - sumPosBelowT);
-            double threshold = (data.get(i).getFeatureValue() + data.get(i + 1).getFeatureValue() / 2);
+            double sumNegAboveT = (sumOfNegWeight - sumNegBelowT);
+            if (sumNegAboveT < 0) sumNegAboveT = 0.001;
+            double sumPosAboveT = (sumOfPosWeight - sumPosBelowT);
+            if (sumPosAboveT < 0) sumPosAboveT = 0.001;
+            double ePos = sumPosBelowT + sumNegAboveT;
+            double eNeg = sumNegBelowT + sumPosAboveT;
+            double threshold = ((data.get(i).getFeatureValue() + data.get(i + 1).getFeatureValue()) / 2);
 
             int polarity;
             double e;
@@ -183,6 +190,8 @@ public class Adaboost {
                 eThreshold = threshold;
             }
         }
+
+
 
         feature.setThreshold(eThreshold);
         feature.setError(eMin);

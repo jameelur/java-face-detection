@@ -1,6 +1,8 @@
 package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadingClassifier;
+import com.cs.comp7502.data.Feature;
+import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
 import com.cs.comp7502.rnd.Trainer;
 
@@ -36,6 +38,9 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import static com.cs.comp7502.data.Feature.colCount;
+import static com.cs.comp7502.data.Feature.rowCount;
+
 @SuppressWarnings("serial")
 public class MainUI extends JFrame {
 
@@ -46,8 +51,9 @@ public class MainUI extends JFrame {
     private static CascadingClassifier openCVEyes;
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
+    private static Stage stage;
     private static Detector detector;
-    ArrayList<Rectangle> rectangles = new ArrayList<>();
+    List<Rectangle> rectangles = new ArrayList<>();
     int[][] image;
 
 
@@ -63,7 +69,7 @@ public class MainUI extends JFrame {
 
     public static void main(String args[]) {
         try {
-            initCascadingClassifiers();
+            initClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             System.out.println(e.toString());
@@ -71,11 +77,54 @@ public class MainUI extends JFrame {
         new MainUI();
     }
 
-    private static void initCascadingClassifiers() {
+    private static void initClassifiers() {
 //        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
 
-        weakHaarClassifiers = Trainer.trainFaces();
+//        weakHaarClassifiers = Trainer.trainFaces();
         detector = new Detector();
+
+        // generate all features
+        List<Feature> featureList = new ArrayList<>();
+        for (int type = 1; type <= Feature.FEATURE_MAP.size(); type++) {
+            int windowCountH = rowCount(type);
+            int windowCountW = colCount(type);
+            for (int height = 1; height <= (24 / windowCountH); height++) {
+                for (int width = 1; width <= (24 / windowCountW); width++) {
+                    for (int x = 0; x < 24 - (height * windowCountH - 1); x ++) {
+                        for (int y = 0; y < 24 - (width * windowCountW - 1); y ++) {
+                            featureList.add(new Feature(type, x, y, width, height));
+                        }
+                    }
+                }
+            }
+        }
+
+        // retrieve list of all face and non face files for training
+        File faceFolder = new File("res/trainingSet/faces");
+        File nonfaceFolder = new File("res/trainingSet/nonFaces");
+
+
+        File[] faceFiles = faceFolder.listFiles();
+        File[] nonfaceFiles = nonfaceFolder.listFiles();
+
+        List<Feature> trainingFeatures = featureList.subList(0, 999);
+        // prepare
+//        Feature feature1 = new Feature(FEATURE_TYPE_1, 11, 6, 6, 2);
+//
+//
+//        File test1 = new File("res/testImages/testImage1.png");
+//        File test2 = new File("res/testImages/testImage2.png");
+//
+//        List<Feature> trainingFeatures = new ArrayList<>();
+//        trainingFeatures.add(feature1);
+
+
+
+        // execute
+        long time = System.currentTimeMillis();
+//        Stage stage = Adaboost.learn(trainingFeatures, new File[]{test1}, new File[]{test2});
+        stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
+        System.out.println("Time taken to boost: " + ((System.currentTimeMillis() - time)/1000) + "s");
     }
 
     private class ImagePanel extends JPanel implements MouseListener, ActionListener, MouseMotionListener {
@@ -116,10 +165,15 @@ public class MainUI extends JFrame {
             integralImageMenuItem.setActionCommand("drawIntegral");
             viewportPopup.add(integralImageMenuItem);
 
-            JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face");
+            JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face using base features");
             detectFaceMenuItem.addActionListener(this);
             detectFaceMenuItem.setActionCommand("drawRect");
             viewportPopup.add(detectFaceMenuItem);
+
+            JMenuItem detectFaceMenuItem2 = new JMenuItem("Detect Face using adaboosted classifier");
+            detectFaceMenuItem2.addActionListener(this);
+            detectFaceMenuItem2.setActionCommand("drawRect2");
+            viewportPopup.add(detectFaceMenuItem2);
 
             JMenuItem exitMenuItem = new JMenuItem("exit");
             exitMenuItem.addActionListener(this);
@@ -254,6 +308,43 @@ public class MainUI extends JFrame {
 //                Rectangle faceArea2 = new Rectangle(235, 220, 110, 110);
 //                rectangles.add(faceArea);
 //                rectangles.add(faceArea2);
+
+                if (rectangles!=null) {
+                    Graphics2D drawing = img.createGraphics();
+                    drawing.setColor(Color.GREEN);
+                    float thickness = 3f;
+                    drawing.setStroke(new BasicStroke(thickness));
+                    for (Rectangle r : rectangles) {
+                        drawing.drawRect(r.x, r.y, r.height, r.width);
+                    }
+                }
+            } else if (e.getActionCommand().equals("drawRect2")){
+
+                img = deepClone(originalImg);
+                double stageThreshold = 0.6;
+
+                boolean notOk = true;
+                while (notOk) {
+                    String s = JOptionPane.showInputDialog(this, "Please enter stage threshold! \n(Must be <1000 and positive)", ""+stage.getStageThreshold());
+                    if (s==null) {
+                        return;
+                    }
+                    try {
+                        double d = Double.parseDouble(s);
+                        if (d>=0.0 && d<1000.0) {
+                            notOk = false;
+                            stageThreshold = d;
+                        }
+                    } catch (Exception ee){
+                    }
+                }
+
+                //too scared to run or test this bit
+                long time = System.currentTimeMillis();
+                stage.setStageThreshold(stageThreshold);
+                rectangles = detector.detectFaces(image, stage);
+                long doneTime = (System.currentTimeMillis() - time) / 60000;
+                System.out.println("time: " + doneTime + " mins, st: " + stageThreshold + ", # of faces detected: " + rectangles.size());
 
                 if (rectangles!=null) {
                     Graphics2D drawing = img.createGraphics();

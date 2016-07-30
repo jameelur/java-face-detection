@@ -31,11 +31,11 @@ public class Feature {
     }
 
     public static int colCount(int type){
-        return FEATURE_MAP.get(type)[0];
+        return FEATURE_MAP.get(type)[1];
     }
 
     public static int rowCount(int type){
-        return FEATURE_MAP.get(type)[1];
+        return FEATURE_MAP.get(type)[0];
     }
 
     private int type;
