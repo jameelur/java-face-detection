@@ -83,7 +83,7 @@ public class Adaboost {
     }
 
 
-    static public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumOfPosWeight, double sumOfNegWeight) {
+    public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumOfPosWeight, double sumOfNegWeight) {
         // find best stump
         // input: one feature, a set of training samples
         // 1. calculate feature values for all training samples based on given feature
@@ -95,6 +95,11 @@ public class Adaboost {
         // error = min(Sp + (Tn - Sn), Sn + (Tp - Sp))
         // where Sp / Sn is the sum of positive / negative weight below this threshold
         // Tn / Tp is the total sum of positive / negative weight based on pre-assigned label
+//        double eMin;
+//        for (int i = 1;  i < data.size(); i++) {
+//             = data.get(i);
+//
+//            double e =
 
         // 4. get the threshold and polarity with minimum error
 
@@ -108,7 +113,7 @@ public class Adaboost {
         return new BestStump(feature, data);
     }
 
-    static class BestStump {
+    class BestStump {
         private Feature feature;
         private List<TrainedImage> trainedImages;
 
@@ -127,7 +132,7 @@ public class Adaboost {
     }
 
 
-    static class TrainedImage implements Comparable<TrainedImage>{
+    class TrainedImage implements Comparable<TrainedImage>{
         int label;
         File file;
         double weight;
@@ -178,4 +183,5 @@ public class Adaboost {
             return Integer.compare(this.getFeatureValue(), o.getFeatureValue());
         }
     }
+
 }
