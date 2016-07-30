@@ -110,4 +110,32 @@ public class CascadingClassifier {
         }
         return cascadedClassifier;
     }
+
+    public static double[] evaluate(CascadingClassifier cascadedClassifier, Stage stage, List<File> faces, List<File> nonfaces) {
+        int faceNum = faces.size();
+        int nonFaceNum = nonfaces.size();
+
+        int posFaceNum = 0;
+        int negNonFaceNum = 0;
+
+        for (File face : faces) {
+            boolean isFace = isFace(cascadedClassifier, face);
+            if (isFace) {
+                isFace = isFace(stage, face);
+                if (isFace)
+                    posFaceNum++;
+            }
+        }
+
+        for (File nonFace : nonfaces) {
+            boolean isFace = isFace(cascadedClassifier, nonFace);
+            if (isFace) {
+                isFace = isFace(stage, nonFace);
+                if (isFace)
+                    negNonFaceNum++;
+            }
+        }
+
+        return new double[]{(double) negNonFaceNum / nonFaceNum, (double) posFaceNum / posFaceNum};
+    }
 }
