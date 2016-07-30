@@ -5,6 +5,7 @@ import com.cs.comp7502.data.Stage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.PackedColorModel;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -82,30 +83,70 @@ public class Adaboost {
         return stage;
     }
 
-
-    public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumOfPosWeight, double sumOfNegWeight) {
-        // find best stump
-        // input: one feature, a set of training samples
+    // find best stump
+    // input: one feature, a set of training samples
+    public static BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumOfPosWeight, double sumOfNegWeight) {
         // 1. calculate feature values for all training samples based on given feature
+        for (TrainedImage datum : data){
+            try {
+                BufferedImage bImage = ImageIO.read(datum.getFile());
+                int[][] image = ImageUtils.buildImageArray(bImage, true);
+                int w = image[0].length;
+                int h = image.length;
+                int[][] integralI = new int[h][w];
+                ImageUtils.buildIntegralImage(image, integralI, w, h);
+                datum.setFeatureValue(feature.getValue(integralI));
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to open training data set", e);
+            }
+        }
 
         // 2. sort the feature value list
+        Collections.sort(data);
 
+        double eMin = 0;
+        int ePolarity = 0;
+        double eThreshold = 0;
+        double sumPosBelowT = 0;
+        double sumNegBelowT = 0;
         // 3. pass over the feature value list to find best threshold
-        // for each feature value we calculate the error for this threshold
-        // error = min(Sp + (Tn - Sn), Sn + (Tp - Sp))
-        // where Sp / Sn is the sum of positive / negative weight below this threshold
-        // Tn / Tp is the total sum of positive / negative weight based on pre-assigned label
-//        double eMin;
-//        for (int i = 1;  i < data.size(); i++) {
-//             = data.get(i);
-//
-//            double e =
+        for (int i = 0; i < data.size() - 1; i++) {
+            // for each feature value we calculate the error for this threshold
+            // error = min(Sp + (Tn - Sn), Sn + (Tp - Sp))
+            // where Sp / Sn is the sum of positive / negative weight below this threshold
+            // Tn / Tp is the total sum of positive / negative weight based on pre-assigned label
+            if (data.get(i).getLabel() == FACE) {
+                sumPosBelowT += data.get(i).getFeatureValue();
+            } else {
+                sumNegBelowT += data.get(i).getFeatureValue();
+            }
 
-        // 4. get the threshold and polarity with minimum error
 
-        // Need a for each feature, you need a list of feature values and their corresponding images
-        // for each feature also need a threshold polarity and error for that t and p
+            double ePos = sumPosBelowT + (sumOfNegWeight - sumNegBelowT);
+            double eNeg = sumNegBelowT + (sumOfPosWeight - sumPosBelowT);
+            double threshold = (data.get(i).getFeatureValue() + data.get(i + 1).getFeatureValue() / 2);
 
+            int polarity;
+            double e;
+            if (ePos < eNeg) {
+                e = ePos;
+                polarity = 1;
+            } else {
+                e = eNeg;
+                polarity = -1;
+            }
+
+            // 4. get the threshold and polarity with minimum error
+            if (e < eMin) {
+                eMin = e;
+                ePolarity = polarity;
+                eThreshold = threshold;
+            }
+        }
+
+        feature.setThreshold(eThreshold);
+        feature.setError(eMin);
+        feature.setPolarity(ePolarity);
 
         // set threshold
         // set error
@@ -113,7 +154,7 @@ public class Adaboost {
         return new BestStump(feature, data);
     }
 
-    class BestStump {
+    static class BestStump {
         private Feature feature;
         private List<TrainedImage> trainedImages;
 
@@ -132,7 +173,7 @@ public class Adaboost {
     }
 
 
-    class TrainedImage implements Comparable<TrainedImage>{
+    static class TrainedImage implements Comparable<TrainedImage> {
         int label;
         File file;
         double weight;
