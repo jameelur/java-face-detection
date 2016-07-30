@@ -69,7 +69,8 @@ public class MainUI extends JFrame {
 
     public static void main(String args[]) {
         try {
-            initClassifiers();
+            detector = new Detector();
+//            initClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,10 +81,10 @@ public class MainUI extends JFrame {
     private static void initClassifiers() {
 //        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
 
-        detector = new Detector();
+//        detector = new Detector();
 
         // training for method 1
-        weakHaarClassifiers = Trainer.trainFaces();
+        //weakHaarClassifiers = Trainer.trainFaces();
 
         // training for method 2
         // generate all features
@@ -167,6 +168,16 @@ public class MainUI extends JFrame {
             integralImageMenuItem.addActionListener(this);
             integralImageMenuItem.setActionCommand("drawIntegral");
             viewportPopup.add(integralImageMenuItem);
+
+            JMenuItem trainFaceMenuItem = new JMenuItem("Train Classifier");
+            trainFaceMenuItem.addActionListener(this);
+            trainFaceMenuItem.setActionCommand("trainFace1");
+            viewportPopup.add(trainFaceMenuItem);
+
+            JMenuItem trainFaceMenuItem2 = new JMenuItem("Train Classifier 2");
+            trainFaceMenuItem2.addActionListener(this);
+            trainFaceMenuItem2.setActionCommand("trainFace2");
+            viewportPopup.add(trainFaceMenuItem2);
 
             JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face using base features");
             detectFaceMenuItem.addActionListener(this);
@@ -265,7 +276,30 @@ public class MainUI extends JFrame {
 
 
 
-            } else if (e.getActionCommand().equals("drawRect")){
+            } else if (e.getActionCommand().equals("trainFace1")) {
+
+                long startTime = System.currentTimeMillis();
+
+                weakHaarClassifiers = Trainer.trainFaces();
+
+                long endTime   = System.currentTimeMillis();
+                long timeTook = endTime - startTime;
+                System.out.println(timeTook);
+                JOptionPane.showMessageDialog(this, "Time took for Trainer.trainFaces(): " + (timeTook/1000) + "s");
+
+            }else if (e.getActionCommand().equals("trainFace2")) {
+
+                long startTime = System.currentTimeMillis();
+
+                initClassifiers();
+
+                long endTime   = System.currentTimeMillis();
+                long timeTook = endTime - startTime;
+                System.out.println(timeTook);
+                JOptionPane.showMessageDialog(this, "Time took for initClassifier(): " + (timeTook/1000) + "s");
+
+            }
+            else if (e.getActionCommand().equals("drawRect")){
 
                 img = deepClone(originalImg);
                 double finalThreshold = 0.6;
