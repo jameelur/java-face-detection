@@ -1,5 +1,4 @@
-package com.cs.comp7502;
-
+import com.cs.comp7502.Adaboost;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
@@ -47,7 +46,7 @@ public class AdaboostTest {
         File[] faceFiles = faceFolder.listFiles();
         File[] nonfaceFiles = nonfaceFolder.listFiles();
 
-        List<Feature> trainingFeatures = featureList.subList(0, 999);
+        List<Feature> trainingFeatures = featureList.subList(0, 10);
 
         // execute
         Stage stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
@@ -83,29 +82,61 @@ public class AdaboostTest {
             // if the sum of result is >= stage threshold the image contains a face
             // otherwise non face
             boolean isFace = sumResult >= stage.getStageThreshold() ? true : false;
+
+            if (isFace) {
+                numPositiveFaces++;
+            }
+            else {
+                numNegativeFaces++;
+            }
         }
 
+        for (File file: trainingNonFace){
+            // for each feature in the stage
+            double sumResult = 0;
+            for (Feature feature : stage.getClassifierList()){
+                // calculate the feature value
+                int value = feature.getValue(file);
+                // if p*feature value < p * threshold
+                int result = 0;
+                if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
+                    // result is 1 else 0
+                    result = 1;
+                }
+                sumResult = feature.getWeight() * result;
+            }
+            // sum up each result with the corresponding feature weight
+            // if the sum of result is >= stage threshold the image contains a face
+            // otherwise non face
+            boolean isFace = sumResult >= stage.getStageThreshold() ? true : false;
 
+            if (isFace) {
+                numPositiveNonFaces++;
+            }
+            else {
+                numNegativeNonFaces++;
+            }
+        }
 
-
-
+        System.out.println("Face: " + numPositiveFaces + " / " + (numPositiveFaces + numNegativeFaces));
+        System.out.println("Non-Face: " + numNegativeNonFaces + " / " + (numPositiveNonFaces + numNegativeNonFaces));
     }
 
-    @Test
-    public void findBestStump() throws Exception {
-        // prepare
-        Feature feature = new Feature(1, 0, 0, 5, 5);
-
-        List<Adaboost.TrainedImage> list = new ArrayList<>();
-        TrainedImage image = new TrainedImage(1, new File("res/test/face0001.png"), 10);
-        TrainedImage image2 = new TrainedImage(1, new File("res/test/face0002.png"), 10);
-        list.add(image);
-        list.add(image2);
-
-        // execute
-        Adaboost.findBestStump(feature, list, 100, 90);
-
-        // verify
-    }
+//    @Test
+//    public void findBestStump() throws Exception {
+//        // prepare
+//        Feature feature = new Feature(1, 0, 0, 5, 5);
+//
+//        List<Adaboost.TrainedImage> list = new ArrayList<>();
+//        TrainedImage image = new TrainedImage(1, new File("res/test/face0001.png"), 10);
+//        TrainedImage image2 = new TrainedImage(1, new File("res/test/face0002.png"), 10);
+//        list.add(image);
+//        list.add(image2);
+//
+//        // execute
+//        Adaboost.findBestStump(feature, list, 100, 90);
+//
+//        // verify
+//    }
 
 }

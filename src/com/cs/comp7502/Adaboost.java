@@ -12,6 +12,49 @@ import java.util.*;
 
 public class Adaboost {
 
+    // Viola-Jones Cascade Classifier
+    //
+    // 1. set following params
+    //      maxFPR, the maximum acceptable false positive rate per layer (stage)
+    //      minDR, the minimum acceptable detection rate per layer (stage)
+    //      targetFPR, the target false positive rate for cascade classifier
+    //      posSet, set of positive samples
+    //      negSet, set of negative samples
+
+    // 2. initialise following params
+    //      FPR = 0.0, the false positive rate we get for current cascade classifier (part of the final one)
+    //      DR = 0.0, the detection rate we get for current cascade classifier (part of the final one)
+    //      i = 0, the layer (stage) index
+
+    // 3. train the cascade classifier
+    //      while (FRP > targetFPR) {
+    //          i++
+    //          n = 0, the size of feature set
+    //          newFPR = FPR
+    //          newDR = DR
+    //
+    //          while (newFPR > maxFPR * FPR) {
+    //              n++
+    //              train a adaboost classifier with posSet, negSet and a feature set having n feature
+    //              evaluate current cascade classifier on validation set to get newFPR and newDR
+    //
+    //              while (newDR < minDR * DR) {
+    //                  decrease the stage threshold for this adaboost classifier
+    //              }
+    //          }
+    //
+    //          FPR = newFPR
+    //          DR = newDR
+    //          clear negSet
+    //
+    //          if (FRP > targetFPR) {
+    //              give a set of negative samples
+    //              for any negative sample which can be detected as face
+    //              put it into negSet
+    //          }
+    //
+    //      }
+
     static int FACE = 1;
     static int NON_FACE = -1;
 
@@ -51,6 +94,7 @@ public class Adaboost {
             double error = bestStump.getFeature().getError();
             double beta = error / (1 - error);
             double alpha = Math.log10(1.0 / beta);
+            bestStump.getFeature().setWeight(alpha);
             stageThreshold += alpha;
 
             // 4. update the weights of training samples
