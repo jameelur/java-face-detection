@@ -15,7 +15,6 @@ public class Adaboost {
     static int FACE = 1;
     static int NON_FACE = -1;
 
-
     public static Stage learn(List<Feature> features, File[] faces, File[] nonFaces){
         Stage stage = new Stage();
         int maxTrainingRounds = features.size();
@@ -78,6 +77,7 @@ public class Adaboost {
             // 6. add the best stump with alpha (the weight of this stump) into this stage
             decisionStumps.add(bestStump.getFeature());
         }
+
         stage.setStageThreshold(stageThreshold / 2);
         stage.setClassifierList(decisionStumps);
         return stage;
@@ -89,13 +89,7 @@ public class Adaboost {
         // 1. calculate feature values for all training samples based on given feature
         for (TrainedImage datum : data){
             try {
-                BufferedImage bImage = ImageIO.read(datum.getFile());
-                int[][] image = ImageUtils.buildImageArray(bImage, true);
-                int w = image[0].length;
-                int h = image.length;
-                int[][] integralI = new int[h][w];
-                ImageUtils.buildIntegralImage(image, integralI, w, h);
-                datum.setFeatureValue(feature.getValue(integralI));
+                datum.setFeatureValue(feature.getValue(datum.getFile()));
             } catch (IOException e) {
                 throw new RuntimeException("Unable to open training data set", e);
             }

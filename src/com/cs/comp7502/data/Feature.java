@@ -2,6 +2,10 @@ package com.cs.comp7502.data;
 
 import com.cs.comp7502.ImageUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +20,7 @@ public class Feature {
     public static int FEATURE_TYPE_4 = 4;
     public static int FEATURE_TYPE_5 = 5;
 
-    private static Map<Integer, int[]> FEATURE_MAP = new HashMap<>();
+    public static Map<Integer, int[]> FEATURE_MAP = new HashMap<>();
 
     static {
         FEATURE_MAP.put(FEATURE_TYPE_1, new int[]{1,2});
@@ -45,6 +49,8 @@ public class Feature {
     private double error;
     private double threshold;
     private int polarity;
+
+    private double weight;
 
     public Feature(int type, int x, int y, int width, int height) {
         this.type = type;
@@ -125,5 +131,24 @@ public class Feature {
         }
 
         return result;
+    }
+
+    public int getValue(File file) throws IOException {
+        BufferedImage bImage = ImageIO.read(file);
+        int[][] image = ImageUtils.buildImageArray(bImage, true);
+        int w = image[0].length;
+        int h = image.length;
+        int[][] integralI = new int[h][w];
+        ImageUtils.buildIntegralImage(image, integralI, w, h);
+
+        return this.getValue(integralI);
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 }
