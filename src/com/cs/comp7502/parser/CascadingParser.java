@@ -1,8 +1,8 @@
 package com.cs.comp7502.parser;
 
-import com.cs.comp7502.classifier.CascadingClassifier;
+import com.cs.comp7502.classifier.CascadedClassifier;
 
 public interface CascadingParser {
 
-    public CascadingClassifier parse(String path);
+    public CascadedClassifier parse(String path);
 }

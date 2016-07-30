@@ -1,20 +1,17 @@
 package com.cs.comp7502;
 
-import com.cs.comp7502.classifier.CascadingClassifier;
-import com.cs.comp7502.data.Feature;
+import com.cs.comp7502.classifier.CascadedClassifier;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.Trainer;
 import com.cs.comp7502.rnd.WHaarClassifier;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
 public class Detector {
 
-    CascadingClassifier cClassifier;
+    CascadedClassifier cClassifier;
 
     /**
      * for testing
@@ -22,7 +19,7 @@ public class Detector {
     public Detector() {
     }
 
-    public Detector(CascadingClassifier cClassifier) {
+    public Detector(CascadedClassifier cClassifier) {
         this.cClassifier = cClassifier;
     }
 
@@ -82,7 +79,7 @@ public class Detector {
                         slidingWindow[i] = Arrays.copyOfRange(input[x + i], y, y + winSize);
                     }
 
-                    if (doesFaceExist(slidingWindow, stage)) {
+                    if (stage.isFace(slidingWindow)) {
                         Rectangle faceArea = new Rectangle(x, y, winSize, winSize);
                         rectangles.add(faceArea);
                     }
@@ -99,7 +96,7 @@ public class Detector {
         double positiveCount = 0;
         double negativeCount = 0;
         for (WHaarClassifier feature : computedFeatures){
-//            if (feature.getType() != 1 && feature.getType() != 2) continue;
+            if (feature.getType() != 1 && feature.getType() != 2) continue;
             double similarity = SimilarityComputation.avgFeatureSimilarity(null, feature, trainedClassifiers.get(feature.getKey()));
             if (similarity > similarityThreshold) positiveCount++;
             else negativeCount++;
@@ -112,31 +109,6 @@ public class Detector {
         return false;
     }
 
-    private boolean doesFaceExist(int[][] inputImage, Stage stage) {
-        // for each feature in the stage
-
-        int h = inputImage.length;
-        int w = inputImage[0].length;
-        int[][] image = new int[h][w];
-        ImageUtils.buildIntegralImage(inputImage, image, w, h);
-
-        double sumResult = 0;
-        for (Feature feature : stage.getClassifierList()){
-            // calculate the feature value
-            int value = feature.getValue(image);
-            // if p*feature value < p * threshold
-            int result = 0;
-            if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
-                // result is 1 else 0
-                result = 1;
-            }
-            sumResult += feature.getWeight() * result;
-        }
-        // sum up each result with the corresponding feature weight
-        // if the sum of result is >= stage threshold the image contains a face
-        // otherwise non face
-        return sumResult >= stage.getStageThreshold() ? true : false;
-    }
 
     /**
      * Sets the integral image and integral image squared from a colour image based on a specific grayscale conversion algorithm

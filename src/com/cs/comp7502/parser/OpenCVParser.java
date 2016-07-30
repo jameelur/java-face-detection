@@ -16,7 +16,7 @@
 //public class OpenCVParser implements CascadingParser {
 //    @Override
 //    public CascadingClassifier parse(String path) {
-//        CascadingClassifier classifier = new CascadingClassifier();
+//        CascadedClassifier classifier = new CascadedClassifier();
 //
 //        try {
 //            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

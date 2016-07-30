@@ -5,51 +5,27 @@ import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CascadingClassifier {
-
-    private int height;
-    private int width;
+public class CascadedClassifier {
 
     private ArrayList<Stage> stages = new ArrayList<Stage>();
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
 
     public ArrayList<Stage> getStages() {
         return stages;
     }
 
-    public void setStages(ArrayList<Stage> stages) {
-        this.stages = stages;
-    }
-
     // Viola-Jones Cascade Classifier
-//
     // 1. set following params
     //      maxFPR, the maximum acceptable false positive rate per layer (stage)
     //      minDR, the minimum acceptable detection rate per layer (stage)
     //      targetFPR, the target false positive rate for cascade classifier
     //      posSet, set of positive samples
     //      negSet, set of negative samples
-
-    public static List<Stage> train(List<Feature> posssibleFeatures, double maxFPR, double minDR, double targetFPR, List<File> faces, List<File> nonFaces) {
+    public static CascadedClassifier train(List<Feature> posssibleFeatures, double maxFPR, double minDR, double targetFPR, List<File> faces, List<File> nonFaces) {
         // 2. initialise following params
         //      FPR = 0.0, the false positive rate we get for current cascade classifier (part of the final one)
         //      DR = 0.0, the detection rate we get for current cascade classifier (part of the final one)
@@ -61,13 +37,10 @@ public class CascadingClassifier {
         List<File> P = faces;
         List<File> N = nonFaces;
 
-        int layer = 0;
-
         // 3. train the cascade classifier
         //      while (FPR > targetFPR) {
-        List<Stage> cascadedClassifier = new ArrayList<>();
+        CascadedClassifier cascadedClassifier = new CascadedClassifier();
         while (fPR > targetFPR) {
-            layer++;
             int n = 0; // the size of feature set
             double newFPR = fPR;
             double newDR = dR;
@@ -78,14 +51,14 @@ public class CascadingClassifier {
                 // train a adaboost classifier with posSet, negSet and a feature set having n feature
                 // evaluate current cascade classifier on validation set to get newFPR and newDR
                 int subsetIndex = ThreadLocalRandom.current().nextInt(0, posssibleFeatures.size() - n);
-                stage = Adaboost.learn(posssibleFeatures.subList(subsetIndex, subsetIndex + n), faces, nonFaces);
+                stage = Adaboost.learn(posssibleFeatures.subList(subsetIndex, subsetIndex + n), P, N);
 
                 double threshold = stage.getStageThreshold();
                 while (newDR < minDR * dR) {
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold--);
                     // (evaluate the cascaded classifier on the training set)
-                    double[] results = evaluate(cascadedClassifier, stage, P, N);
+                    double[] results = cascadedClassifier.evaluate(stage, faces, nonFaces);
                     newDR = results[0];
                     newFPR = results[1];
                 }
@@ -103,7 +76,7 @@ public class CascadingClassifier {
                 for (File nonFace : nonFaces){
                     // for any negative sample which can be detected as face
                     // put it into negSet
-                    boolean isFace = isFace(cascadedClassifier, nonFace);
+                    boolean isFace = cascadedClassifier.isFace(nonFace);
                     if (isFace) N.add(nonFace);
                 }
             }
@@ -111,7 +84,18 @@ public class CascadingClassifier {
         return cascadedClassifier;
     }
 
-    public static double[] evaluate(CascadingClassifier cascadedClassifier, Stage stage, List<File> faces, List<File> nonfaces) {
+    private void add(Stage stage) {
+        stages.add(stage);
+    }
+
+    public boolean isFace(File image) {
+        for (Stage stage: stages) {
+            if (!stage.isFace(image)) return false;
+        }
+        return true;
+    }
+
+    public double[] evaluate(Stage stage, List<File> faces, List<File> nonfaces) {
         int faceNum = faces.size();
         int nonFaceNum = nonfaces.size();
 
@@ -119,23 +103,23 @@ public class CascadingClassifier {
         int negNonFaceNum = 0;
 
         for (File face : faces) {
-            boolean isFace = isFace(cascadedClassifier, face);
+            boolean isFace = this.isFace(face);
             if (isFace) {
-                isFace = isFace(stage, face);
+                isFace = stage.isFace(face);
                 if (isFace)
                     posFaceNum++;
             }
         }
 
         for (File nonFace : nonfaces) {
-            boolean isFace = isFace(cascadedClassifier, nonFace);
+            boolean isFace = this.isFace(nonFace);
             if (isFace) {
-                isFace = isFace(stage, nonFace);
+                isFace = stage.isFace(nonFace);
                 if (isFace)
                     negNonFaceNum++;
             }
         }
 
-        return new double[]{(double) negNonFaceNum / nonFaceNum, (double) posFaceNum / posFaceNum};
+        return new double[]{(double) posFaceNum / faceNum, (double) negNonFaceNum / nonFaceNum};
     }
 }

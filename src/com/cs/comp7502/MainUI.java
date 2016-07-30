@@ -1,6 +1,6 @@
 package com.cs.comp7502;
 
-import com.cs.comp7502.classifier.CascadingClassifier;
+import com.cs.comp7502.classifier.CascadedClassifier;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
@@ -47,8 +47,8 @@ public class MainUI extends JFrame {
     private JPopupMenu viewportPopup;
     private JLabel infoLabel = new JLabel("");
 
-    private static CascadingClassifier openCVFrontalFace;
-    private static CascadingClassifier openCVEyes;
+    private static CascadedClassifier openCVFrontalFace;
+    private static CascadedClassifier openCVEyes;
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
     private static Stage stage;
