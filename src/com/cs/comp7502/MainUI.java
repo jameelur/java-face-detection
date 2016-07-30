@@ -72,7 +72,7 @@ public class MainUI extends JFrame {
             initClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
         new MainUI();
     }
@@ -331,7 +331,7 @@ public class MainUI extends JFrame {
                     }
                     try {
                         double d = Double.parseDouble(s);
-                        if (d>=0.0 && d<1000.0) {
+                        if (d>=0.0 && d<10000.0) {
                             notOk = false;
                             stageThreshold = d;
                         }
