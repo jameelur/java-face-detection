@@ -11,52 +11,84 @@ import java.util.*;
 
 public class Adaboost {
 
+    static int FACE = 1;
+    static int NON_FACE = -1;
 
-    public static Stage learn(File[] faces, File[] nonFaces, int maxTrainingRounds){
+
+    public static Stage learn(List<Feature> features, File[] faces, File[] nonFaces){
         Stage stage = new Stage();
+        int maxTrainingRounds = features.size();
+        List<TrainedImage> images = new ArrayList<>();
+        double posWeight = 1.0 / faces.length;
+        double negWeight = 1.0 / nonFaces.length;
+        double sumOfPosWeight = 1.0;
+        double sumOfNegWeight = 1.0;
+        ArrayList<Feature> decisionStumps = new ArrayList<>();
+        double stageThreshold = 0.0;
+
+        for (File face : faces)
+            images.add(new TrainedImage(FACE, face, posWeight));
+
+        for (File nonFace: nonFaces)
+            images.add(new TrainedImage(NON_FACE, nonFace, negWeight));
 
         // using list of faces and non faces make a list of TrainedImages with labels and weights set to 1/ total pos and neg respectively
 
         for (int round = 0; round < maxTrainingRounds;  round++) {
-            // normalize
+            // 0. normalize the weights
+            double sumOfWeight = sumOfPosWeight + sumOfNegWeight;
+            for (TrainedImage image : images) {
+                double oldWeight = image.getWeight();
+                image.setWeight(oldWeight / sumOfWeight);
+            }
 
             // 1. find best stump, and the return values from the best stump should contain
             // error, threshold, polarity, and (optional) classified correct or not
+            BestStump bestStump = findBestStump(features.get(round), images, sumOfPosWeight, sumOfNegWeight);
 
             // 2. calculate the beta = error / (1 - error)
             // 3. calculate the alpha = log(1 / beta), but I am not sure the base of the log
+            double error = bestStump.getFeature().getError();
+            double beta = error / (1 - error);
+            double alpha = Math.log10(1.0 / beta);
+            stageThreshold += alpha;
 
             // 4. update the weights of training samples
             // if the sample is classified correct, newWeight = oldWeight * beta
             // if the sample is classified wrong, don't change the weight
-
+            //
             // 5. (optional) update total sum of positive / negative weight based on pre-assigned label
+            double threshold = bestStump.getFeature().getThreshold();
+            int polarity = bestStump.getFeature().getPolarity();
+
+            for (TrainedImage image : images) {
+                if (((double) polarity * image.featureValue) < (polarity * threshold)) {
+                    double oldWeight = image.weight;
+                    double newWeight = oldWeight * beta;
+                    image.weight = newWeight;
+
+                    if (image.label == FACE)
+                        sumOfPosWeight += -oldWeight + newWeight;
+                    else
+                        sumOfNegWeight += -oldWeight + newWeight;
+                }
+            }
 
             // 6. add the best stump with alpha (the weight of this stump) into this stage
+            decisionStumps.add(bestStump.getFeature());
         }
+        stage.setStageThreshold(stageThreshold / 2);
+        stage.setClassifierList(decisionStumps);
         return stage;
     }
 
-    // find best stump
-    // input: one feature, a set of training samples
-    public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumPos, double sumNeg) {
+
+    static public BestStump findBestStump(Feature feature, List<TrainedImage> data, double sumOfPosWeight, double sumOfNegWeight) {
+        // find best stump
+        // input: one feature, a set of training samples
         // 1. calculate feature values for all training samples based on given feature
 
-        for (TrainedImage datum: data){
-            datum.setFeatureValue(0);
-            int[][] image = new int[0][];
-            try {
-                BufferedImage img = ImageIO.read(datum.getFile());
-                int[][] tempImg = ImageUtils.buildImageArray(img, true);
-                ImageUtils.buildIntegralImage(image, tempImg, tempImg[0].length, tempImg.length);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            datum.setFeatureValue(feature.getValue(image));
-        }
-
         // 2. sort the feature value list
-        Collections.sort(data);
 
         // 3. pass over the feature value list to find best threshold
         // for each feature value we calculate the error for this threshold
@@ -76,7 +108,7 @@ public class Adaboost {
         return new BestStump(feature, data);
     }
 
-    class BestStump {
+    static class BestStump {
         private Feature feature;
         private List<TrainedImage> trainedImages;
 
@@ -94,16 +126,18 @@ public class Adaboost {
         }
     }
 
-    class TrainedImage implements Comparable<TrainedImage>{
+
+    static class TrainedImage implements Comparable<TrainedImage>{
         int label;
         File file;
         double weight;
 
         int featureValue;
 
-        public TrainedImage(int label, File file) {
+        public TrainedImage(int label, File file, double weight) {
             this.label = label;
             this.file = file;
+            this.weight = weight;
         }
 
         public int getLabel() {
@@ -138,9 +172,10 @@ public class Adaboost {
             this.featureValue = featureValue;
         }
 
+
         @Override
         public int compareTo(TrainedImage o) {
-            return Integer.compare(this.getFeatureValue(), o.featureValue);
+            return Integer.compare(this.getFeatureValue(), o.getFeatureValue());
         }
     }
 }
