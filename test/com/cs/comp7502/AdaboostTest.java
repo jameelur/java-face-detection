@@ -1,3 +1,5 @@
+package com.cs.comp7502;
+
 import com.cs.comp7502.Adaboost;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
@@ -5,6 +7,7 @@ import com.cs.comp7502.rnd.WHaarClassifier;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,18 +49,20 @@ public class AdaboostTest {
         File[] faceFiles = faceFolder.listFiles();
         File[] nonfaceFiles = nonfaceFolder.listFiles();
 
-        List<Feature> trainingFeatures = featureList.subList(0, 10);
+        List<Feature> trainingFeatures = featureList.subList(0, 9);
 
         // execute
+        long time = System.currentTimeMillis();
         Stage stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
+        System.out.println("Time taken to boost: " + ((System.currentTimeMillis() - time)/1000) + "s");
 
         // verify
         // retrieve list of all face and non face files for testing
-        File trainingFaceFolder = new File("res/trainingExamples/faces");
-        File trainingNonfaceFolder = new File("res/trainingExamples/nonFaces");
+        File trainingFaceFolder = new File("res/testingExamples/faces");
+        File trainingNonfaceFolder = new File("res/testingExamples/nonFaces");
 
         File[] trainingFaces = trainingFaceFolder.listFiles();
-        File[] trainingNonFace = trainingNonfaceFolder.listFiles();
+        File[] trainingNonFaces = trainingNonfaceFolder.listFiles();
 
         // for each image
         int numPositiveFaces = 0;
@@ -65,23 +70,8 @@ public class AdaboostTest {
         int numPositiveNonFaces = 0;
         int numNegativeNonFaces = 0;
         for (File file: trainingFaces){
-            // for each feature in the stage
-            double sumResult = 0;
-            for (Feature feature : stage.getClassifierList()){
-                // calculate the feature value
-                int value = feature.getValue(file);
-                // if p*feature value < p * threshold
-                int result = 0;
-                if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
-                    // result is 1 else 0
-                    result = 1;
-                }
-                sumResult = feature.getWeight() * result;
-            }
-            // sum up each result with the corresponding feature weight
-            // if the sum of result is >= stage threshold the image contains a face
-            // otherwise non face
-            boolean isFace = sumResult >= stage.getStageThreshold() ? true : false;
+            boolean isFace = isFace(stage, file);
+
 
             if (isFace) {
                 numPositiveFaces++;
@@ -91,24 +81,9 @@ public class AdaboostTest {
             }
         }
 
-        for (File file: trainingNonFace){
+        for (File file: trainingNonFaces){
             // for each feature in the stage
-            double sumResult = 0;
-            for (Feature feature : stage.getClassifierList()){
-                // calculate the feature value
-                int value = feature.getValue(file);
-                // if p*feature value < p * threshold
-                int result = 0;
-                if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
-                    // result is 1 else 0
-                    result = 1;
-                }
-                sumResult = feature.getWeight() * result;
-            }
-            // sum up each result with the corresponding feature weight
-            // if the sum of result is >= stage threshold the image contains a face
-            // otherwise non face
-            boolean isFace = sumResult >= stage.getStageThreshold() ? true : false;
+            boolean isFace = isFace(stage, file);
 
             if (isFace) {
                 numPositiveNonFaces++;
@@ -120,6 +95,26 @@ public class AdaboostTest {
 
         System.out.println("Face: " + numPositiveFaces + " / " + (numPositiveFaces + numNegativeFaces));
         System.out.println("Non-Face: " + numNegativeNonFaces + " / " + (numPositiveNonFaces + numNegativeNonFaces));
+    }
+
+    private boolean isFace(Stage stage, File file) throws IOException {
+        // for each feature in the stage
+        double sumResult = 0;
+        for (Feature feature : stage.getClassifierList()){
+            // calculate the feature value
+            int value = feature.getValue(file);
+            // if p*feature value < p * threshold
+            int result = 0;
+            if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
+                // result is 1 else 0
+                result = 1;
+            }
+            sumResult = feature.getWeight() * result;
+        }
+        // sum up each result with the corresponding feature weight
+        // if the sum of result is >= stage threshold the image contains a face
+        // otherwise non face
+        return sumResult >= stage.getStageThreshold() ? true : false;
     }
 
 //    @Test

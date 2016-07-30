@@ -62,10 +62,10 @@ public class Adaboost {
         Stage stage = new Stage();
         int maxTrainingRounds = features.size();
         List<TrainedImage> images = new ArrayList<>();
-        double posWeight = 1.0 / faces.length;
-        double negWeight = 1.0 / nonFaces.length;
-        double sumOfPosWeight = 1.0;
-        double sumOfNegWeight = 1.0;
+        double posWeight = 1.0 / 2.0 * faces.length;
+        double negWeight = 1.0 / 2.0 * nonFaces.length;
+        double sumOfPosWeight = 0.5;
+        double sumOfNegWeight = 0.5;
         ArrayList<Feature> decisionStumps = new ArrayList<>();
         double stageThreshold = 0.0;
 
@@ -80,6 +80,8 @@ public class Adaboost {
         for (int round = 0; round < maxTrainingRounds;  round++) {
             // 0. normalize the weights
             double sumOfWeight = sumOfPosWeight + sumOfNegWeight;
+            sumOfPosWeight /= sumOfWeight;
+            sumOfNegWeight /= sumOfWeight;
             for (TrainedImage image : images) {
                 double oldWeight = image.getWeight();
                 image.setWeight(oldWeight / sumOfWeight);
@@ -142,7 +144,7 @@ public class Adaboost {
         // 2. sort the feature value list
         Collections.sort(data);
 
-        double eMin = 0;
+        double eMin = 2; // min error cannot be larger than 1
         int ePolarity = 0;
         double eThreshold = 0;
         double sumPosBelowT = 0;
@@ -154,9 +156,9 @@ public class Adaboost {
             // where Sp / Sn is the sum of positive / negative weight below this threshold
             // Tn / Tp is the total sum of positive / negative weight based on pre-assigned label
             if (data.get(i).getLabel() == FACE) {
-                sumPosBelowT += data.get(i).getFeatureValue();
+                sumPosBelowT += data.get(i).getWeight();
             } else {
-                sumNegBelowT += data.get(i).getFeatureValue();
+                sumNegBelowT += data.get(i).getWeight();
             }
 
 
