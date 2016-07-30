@@ -130,7 +130,7 @@ public class Detector {
                 // result is 1 else 0
                 result = 1;
             }
-            sumResult = feature.getWeight() * result;
+            sumResult += feature.getWeight() * result;
         }
         // sum up each result with the corresponding feature weight
         // if the sum of result is >= stage threshold the image contains a face

@@ -96,7 +96,7 @@ public class AdaboostTest {
         Stage stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
         System.out.println("Time taken to boost: " + ((System.currentTimeMillis() - time)/1000) + "s");
 
-        for (double i = 1 ; i > 0.001; i-=0.01){
+        for (double i = stage.getStageThreshold() * 2 ; i > 0; i-= 10){
             System.out.println("Setting stage threshold to " + i);
             stage.setStageThreshold(i);
 
@@ -154,7 +154,7 @@ public class AdaboostTest {
                 // result is 1 else 0
                 result = 1;
             }
-            sumResult = feature.getWeight() * result;
+            sumResult += feature.getWeight() * result;
         }
         // sum up each result with the corresponding feature weight
         // if the sum of result is >= stage threshold the image contains a face

@@ -80,9 +80,12 @@ public class MainUI extends JFrame {
     private static void initClassifiers() {
 //        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
 
-//        weakHaarClassifiers = Trainer.trainFaces();
         detector = new Detector();
 
+        // training for method 1
+        weakHaarClassifiers = Trainer.trainFaces();
+
+        // training for method 2
         // generate all features
         List<Feature> featureList = new ArrayList<>();
         for (int type = 1; type <= Feature.FEATURE_MAP.size(); type++) {
