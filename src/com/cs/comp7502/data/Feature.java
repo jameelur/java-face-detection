@@ -6,7 +6,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -150,5 +152,24 @@ public class Feature {
 
     public void setWeight(double weight) {
         this.weight = weight;
+    }
+
+    public static List<Feature> generateAllFeatures() {
+        // generate all features
+        List<Feature> featureList = new ArrayList<>();
+        for (int type = 1; type <= Feature.FEATURE_MAP.size(); type++) {
+            int windowCountH = rowCount(type);
+            int windowCountW = colCount(type);
+            for (int height = 1; height <= (24 / windowCountH); height++) {
+                for (int width = 1; width <= (24 / windowCountW); width++) {
+                    for (int x = 0; x < 24 - (height * windowCountH - 1); x ++) {
+                        for (int y = 0; y < 24 - (width * windowCountW - 1); y ++) {
+                            featureList.add(new Feature(type, x, y, width, height));
+                        }
+                    }
+                }
+            }
+        }
+        return featureList;
     }
 }
