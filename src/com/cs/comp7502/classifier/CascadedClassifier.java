@@ -41,11 +41,12 @@ public class CascadedClassifier {
 
         // 3. train the cascade classifier
         //      while (FPR > targetFPR) {
-        int layer = 0;
+        int layer = 1;
         CascadedClassifier cascadedClassifier = new CascadedClassifier();
         System.out.println("----Starting training----");
         while (fPR > targetFPR) {
-            layer++;
+            int maxClassifiers = Math.min(10*layer + 10, 200);
+
             int n = 0; // the size of feature set
             System.out.println("----Computing stage " +  layer + "----");
             long stageTime = System.currentTimeMillis();
@@ -53,11 +54,16 @@ public class CascadedClassifier {
             double newDR = dR;
 
             Stage stage = null;
-
+            boolean retry = false;
 //            Set<Integer> usedFeatures = new HashSet<>();
             List<Feature> featureSubset = new ArrayList<>();
             while (newFPR > maxFPR * fPR) {
                 n++;
+                if (featureSubset.size() >= maxClassifiers) {
+                    retry = true;
+                    break;
+                    // retry with new subset of feature
+                }
                 // train a adaboost classifier with posSet, negSet and a feature set having n feature
                 // evaluate current cascade classifier on validation set to get newFPR and newDR
 
@@ -85,6 +91,11 @@ public class CascadedClassifier {
                 } while (newDR < minDR * dR);
                 System.out.println("----Computed stage " + layer + ", classifier " + n + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR +" newDR " + newDR + " dR " + dR + "----");
             }
+            if (retry) {
+                System.out.println("Max number of classifiers per cascade reached, retrying...");
+                continue;
+            }
+
             if (stage == null) throw new RuntimeException("stage is null");
             cascadedClassifier.add(stage);
             System.out.println("----Finished computing stage " +  layer + " in" + ((System.currentTimeMillis() - stageTime)/1000) +"s ----");
@@ -104,6 +115,7 @@ public class CascadedClassifier {
                     if (isFace) N.add(nonFace);
                 }
             }
+            layer++;
         }
         return cascadedClassifier;
     }
