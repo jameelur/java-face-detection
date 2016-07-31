@@ -57,12 +57,12 @@ public class Stage implements JSONRW {
         ImageUtils.buildIntegralImage(inputImage, image, w, h);
 
         double sumResult = 0;
-        for (Feature feature : classifierList){
+        for (Feature feature : classifierList) {
             // calculate the feature value
             int value = feature.getValue(image);
             // if p*feature value < p * threshold
             int result = 0;
-            if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()){
+            if (feature.getPolarity() * value < feature.getPolarity() * feature.getThreshold()) {
                 // result is 1 else 0
                 result = 1;
             }
@@ -76,7 +76,20 @@ public class Stage implements JSONRW {
 
     @Override
     public JSONObject encode() {
-        return null;
+        JSONObject stage = new JSONObject();
+        JSONArray features = new JSONArray();
+        try {
+            ArrayList<Feature> classifierList = getClassifierList();
+            for (Feature feature : classifierList) {
+                JSONObject featureJSON = feature.encode();
+                features.put(featureJSON);
+            }
+            stage.put("stageThreshold", getStageThreshold());
+            stage.put("features", features);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return stage;
     }
 
     @Override

@@ -165,7 +165,22 @@ public class CascadedClassifier implements JSONRW {
 
     @Override
     public JSONObject encode() {
-        return null;
+        JSONObject cascadedClassifier = new JSONObject();
+        JSONArray stages = new JSONArray();
+        int stageNum = 0;
+        try {
+            ArrayList<Stage> stageList = getStages();
+            stageNum = stageList.size();
+            for (Stage stage : stageList) {
+                JSONObject stageJSON = stage.encode();
+                stages.put(stageJSON);
+            }
+            cascadedClassifier.put("stage#", stageNum);
+            cascadedClassifier.put("stages", stages);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return cascadedClassifier;
     }
 
     @Override

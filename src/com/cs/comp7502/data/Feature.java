@@ -176,7 +176,21 @@ public class Feature implements JSONRW {
 
     @Override
     public JSONObject encode() {
-        return null;
+        JSONObject feature = new JSONObject();
+        try {
+            feature.put("type", this.type);
+            feature.put("x", this.x);
+            feature.put("y", this.y);
+            feature.put("width", this.width);
+            feature.put("height", this.height);
+            feature.put("error", this.error);
+            feature.put("threshold", this.threshold);
+            feature.put("polarity", this.polarity);
+            feature.put("weight", this.weight);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return feature;
     }
 
     @Override
