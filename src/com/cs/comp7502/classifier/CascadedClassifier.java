@@ -135,6 +135,13 @@ public class CascadedClassifier implements JSONRW {
         return true;
     }
 
+    public boolean isFace(int[][] image) {
+        for (Stage stage: stages) {
+            if (!stage.isFace(image)) return false;
+        }
+        return true;
+    }
+
     public double[] evaluate(Stage stage, List<File> faces, List<File> nonfaces) {
         int faceNum = faces.size();
         int nonFaceNum = nonfaces.size();

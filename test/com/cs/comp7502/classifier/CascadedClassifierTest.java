@@ -1,9 +1,11 @@
 package com.cs.comp7502.classifier;
 
 import com.cs.comp7502.data.Feature;
+import org.json.JSONObject;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +32,12 @@ public class CascadedClassifierTest {
 
         // verify
         System.out.println("Time taken to generate a cascade classifier of stages #:" + train.getStages().size() + " is " + ((System.currentTimeMillis() - time) / 1000) + "s");
+
+        JSONObject result = train.encode();
+        try (FileWriter file = new FileWriter("CascadeClassifier_" + System.currentTimeMillis()+".json")) {
+            file.write(result.toString());
+            System.out.println("Successfully Copied JSON Object to File...");
+        }
     }
 
 }

@@ -355,7 +355,7 @@ public class MainUI extends JFrame {
                 if (rectangles!=null) {
                     Graphics2D drawing = img.createGraphics();
                     drawing.setColor(Color.GREEN);
-                    float thickness = 3f;
+                    float thickness = 2f;
                     drawing.setStroke(new BasicStroke(thickness));
                     for (Rectangle r : rectangles) {
                         drawing.drawRect(r.x, r.y, r.height, r.width);
@@ -392,7 +392,27 @@ public class MainUI extends JFrame {
                 if (rectangles!=null) {
                     Graphics2D drawing = img.createGraphics();
                     drawing.setColor(Color.GREEN);
-                    float thickness = 3f;
+                    float thickness = 2f;
+                    drawing.setStroke(new BasicStroke(thickness));
+                    for (Rectangle r : rectangles) {
+                        drawing.drawRect(r.x, r.y, r.height, r.width);
+                    }
+                }
+            } else if (e.getActionCommand().equals("drawRect3")){
+
+                img = deepClone(originalImg);
+
+                //too scared to run or test this bit
+                long time = System.currentTimeMillis();
+
+                rectangles = detector.detectFaces(image, cascadedClassifier);
+                long doneTime = (System.currentTimeMillis() - time) / 60000;
+                System.out.println("time: " + doneTime + " mins, # of faces detected: " + rectangles.size());
+
+                if (rectangles!=null) {
+                    Graphics2D drawing = img.createGraphics();
+                    drawing.setColor(Color.GREEN);
+                    float thickness = 2f;
                     drawing.setStroke(new BasicStroke(thickness));
                     for (Rectangle r : rectangles) {
                         drawing.drawRect(r.x, r.y, r.height, r.width);
