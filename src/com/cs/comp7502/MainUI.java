@@ -5,6 +5,8 @@ import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
 import com.cs.comp7502.rnd.Trainer;
+import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +50,7 @@ public class MainUI extends JFrame {
     private JPopupMenu viewportPopup;
     private JLabel infoLabel = new JLabel("");
 
-    private static CascadedClassifier openCVFrontalFace;
-    private static CascadedClassifier openCVEyes;
+    private static CascadedClassifier cascadedClassifier;
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
     private static Stage stage;
@@ -70,7 +72,6 @@ public class MainUI extends JFrame {
     public static void main(String args[]) {
         try {
             detector = new Detector();
-//            initClassifiers();
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,54 +80,19 @@ public class MainUI extends JFrame {
     }
 
     private static void initClassifiers() {
-//        openCVFrontalFace = new OpenCVParser().parse("file in assets?");
-
-//        detector = new Detector();
-
-        // training for method 1
-        //weakHaarClassifiers = Trainer.trainFaces();
-
-        // training for method 2
-        // generate all features
-        List<Feature> featureList = new ArrayList<>();
-        for (int type = 1; type <= Feature.FEATURE_MAP.size(); type++) {
-            int windowCountH = rowCount(type);
-            int windowCountW = colCount(type);
-            for (int height = 1; height <= (24 / windowCountH); height++) {
-                for (int width = 1; width <= (24 / windowCountW); width++) {
-                    for (int x = 0; x < 24 - (height * windowCountH - 1); x ++) {
-                        for (int y = 0; y < 24 - (width * windowCountW - 1); y ++) {
-                            featureList.add(new Feature(type, x, y, width, height));
-                        }
-                    }
-                }
-            }
-        }
+        List<Feature> featureList = Feature.generateAllFeatures();
 
         // retrieve list of all face and non face files for training
         File faceFolder = new File("res/trainingSet/faces");
         File nonfaceFolder = new File("res/trainingSet/nonFaces");
 
-
         File[] faceFiles = faceFolder.listFiles();
         File[] nonfaceFiles = nonfaceFolder.listFiles();
 
         List<Feature> trainingFeatures = featureList.subList(0, 999);
-        // prepare
-//        Feature feature1 = new Feature(FEATURE_TYPE_1, 11, 6, 6, 2);
-//
-//
-//        File test1 = new File("res/testImages/testImage1.png");
-//        File test2 = new File("res/testImages/testImage2.png");
-//
-//        List<Feature> trainingFeatures = new ArrayList<>();
-//        trainingFeatures.add(feature1);
-
-
 
         // execute
         long time = System.currentTimeMillis();
-//        Stage stage = Adaboost.learn(trainingFeatures, new File[]{test1}, new File[]{test2});
         stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
         System.out.println("Time taken to boost: " + ((System.currentTimeMillis() - time)/1000) + "s");
     }
@@ -169,25 +135,35 @@ public class MainUI extends JFrame {
             integralImageMenuItem.setActionCommand("drawIntegral");
             viewportPopup.add(integralImageMenuItem);
 
-            JMenuItem trainFaceMenuItem = new JMenuItem("Train Classifier");
+            JMenuItem trainFaceMenuItem = new JMenuItem("Train base features");
             trainFaceMenuItem.addActionListener(this);
             trainFaceMenuItem.setActionCommand("trainFace1");
             viewportPopup.add(trainFaceMenuItem);
 
-            JMenuItem trainFaceMenuItem2 = new JMenuItem("Train Classifier 2");
+            JMenuItem trainFaceMenuItem2 = new JMenuItem("Train one classifier");
             trainFaceMenuItem2.addActionListener(this);
             trainFaceMenuItem2.setActionCommand("trainFace2");
             viewportPopup.add(trainFaceMenuItem2);
+
+            JMenuItem trainFaceMenuItem3 = new JMenuItem("Import existing trained classifier json");
+            trainFaceMenuItem3.addActionListener(this);
+            trainFaceMenuItem3.setActionCommand("trainFace3");
+            viewportPopup.add(trainFaceMenuItem3);
 
             JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face using base features");
             detectFaceMenuItem.addActionListener(this);
             detectFaceMenuItem.setActionCommand("drawRect");
             viewportPopup.add(detectFaceMenuItem);
 
-            JMenuItem detectFaceMenuItem2 = new JMenuItem("Detect Face using adaboosted classifier");
+            JMenuItem detectFaceMenuItem2 = new JMenuItem("Detect Face using one stage");
             detectFaceMenuItem2.addActionListener(this);
             detectFaceMenuItem2.setActionCommand("drawRect2");
             viewportPopup.add(detectFaceMenuItem2);
+
+            JMenuItem detectFaceMenuItem3 = new JMenuItem("Detect Face using cascaded classifier");
+            detectFaceMenuItem3.addActionListener(this);
+            detectFaceMenuItem3.setActionCommand("drawRect3");
+            viewportPopup.add(detectFaceMenuItem3);
 
             JMenuItem exitMenuItem = new JMenuItem("exit");
             exitMenuItem.addActionListener(this);
@@ -297,6 +273,36 @@ public class MainUI extends JFrame {
                 long timeTook = endTime - startTime;
                 System.out.println(timeTook);
                 JOptionPane.showMessageDialog(this, "Time took for initClassifier(): " + (timeTook/1000) + "s");
+
+            }else if (e.getActionCommand().equals("trainFace3")) {
+                final JFileChooser fc = new JFileChooser();
+                FileFilter fileFilter = new FileNameExtensionFilter("JSON Files","json");
+                fc.addChoosableFileFilter(fileFilter);
+                fc.setDragEnabled(true);
+                fc.setMultiSelectionEnabled(false);
+                int result =  fc.showOpenDialog(this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    try {
+                        System.out.println("loading json from path: " + file.getAbsolutePath());
+
+                        long startTime = System.currentTimeMillis();
+                        JSONParser jsonParser = new JSONParser();
+                        JSONObject json = (JSONObject) jsonParser.parse(new FileReader(file));
+
+                        cascadedClassifier = new CascadedClassifier();
+                        cascadedClassifier.decode(json);
+
+                        long endTime   = System.currentTimeMillis();
+                        long timeTaken = endTime - startTime;
+                        System.out.println(timeTaken);
+                        JOptionPane.showMessageDialog(this, "Time taken to parse json: " + (timeTaken/1000) + "s");
+                    } catch (Exception ee) {
+                        ee.printStackTrace();
+                    }
+                }
+
+
 
             }
             else if (e.getActionCommand().equals("drawRect")){
