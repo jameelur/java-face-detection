@@ -6,10 +6,8 @@ import com.cs.comp7502.data.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.net.Inet4Address;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CascadedClassifier {
@@ -41,12 +39,12 @@ public class CascadedClassifier {
 
         // 3. train the cascade classifier
         //      while (FPR > targetFPR) {
-        int layer = 0;
+        int layer = 1;
         CascadedClassifier cascadedClassifier = new CascadedClassifier();
         System.out.println("----Starting training----");
         while (fPR > targetFPR) {
-            layer++;
-            int n = 0; // the size of feature set
+            int maxClassifiers = Math.min(10*layer + 20, 200);
+
             System.out.println("----Computing stage " +  layer + "----");
             long stageTime = System.currentTimeMillis();
             double newFPR = fPR;
@@ -54,26 +52,46 @@ public class CascadedClassifier {
 
             Stage stage = null;
 
-//            Set<Integer> usedFeatures = new HashSet<>();
+            Collections.shuffle(possibleFeatures);
+            List<Integer> unUsedFeatures = new ArrayList<>();
+            for (int i = 0; i < possibleFeatures.size() -1; i++){
+                unUsedFeatures.add(i);
+            }
+            Set<Integer> usedFeatures = new HashSet<>();
             List<Feature> featureSubset = new ArrayList<>();
+            boolean retry = false;
             while (newFPR > maxFPR * fPR) {
-                n++;
+                if (featureSubset.size() >= maxClassifiers) {
+                    retry = true;
+                    break;
+                    // retry with new subset of feature
+                }
                 // train a adaboost classifier with posSet, negSet and a feature set having n feature
                 // evaluate current cascade classifier on validation set to get newFPR and newDR
-
-//                while (true) {
-                    int subIndex = ThreadLocalRandom.current().nextInt(0, possibleFeatures.size() - n);
-//                    if (!usedFeatures.contains(subIndex)) {
-//                        featureSubset.add(possibleFeatures.get(subIndex));
-//                        usedFeatures.add(subIndex);
-//                        break;
-//                    }
-//                }
-                stage = Adaboost.learn(possibleFeatures.subList(subIndex, subIndex + n), P, N);
+                int subIndex;
+                int value;
+                while (true) {
+                    subIndex = ThreadLocalRandom.current().nextInt(0, unUsedFeatures.size());
+                    value = unUsedFeatures.get(subIndex);
+                    if (!usedFeatures.contains(value)) {
+                        featureSubset.add(possibleFeatures.get(value));
+                        unUsedFeatures.remove(subIndex);
+                        usedFeatures.add(value);
+                        break;
+                    }
+                }
+                stage = Adaboost.learn(featureSubset, P, N);
 
                 double threshold = stage.getStageThreshold();
-                double decrement = Math.abs(threshold) * 0.01;
+                double originalThreshold = threshold;
+                double decrement = Math.abs(originalThreshold) * 0.02;
+                boolean discard = false;
+                double originalDR = newDR;
+                double originalFPR = newFPR;
+//                decrement = Math.min(decrement, 0.001); //prevent decrement from being too small causing precision problems
                 do {
+                    discard = threshold < originalThreshold - Math.abs(originalThreshold);
+                    if (discard) break;
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold);
                     threshold -= decrement;
@@ -83,7 +101,20 @@ public class CascadedClassifier {
                     newFPR = results[1];
 
                 } while (newDR < minDR * dR);
-                System.out.println("----Computed stage " + layer + ", classifier " + n + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR +" newDR " + newDR + " dR " + dR + "----");
+                if (discard) {
+                    featureSubset.remove(featureSubset.size() - 1);
+                    usedFeatures.remove(value);
+                    unUsedFeatures.add(subIndex, value);
+                    newFPR = originalFPR;
+                    newDR = originalDR;
+                    System.out.println("----Computed stage " + layer + ", discard classifier, decrement " + decrement + "----");
+                } else {
+                    System.out.println("----Computed stage " + layer + ", classifier " + featureSubset.size() + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR + " newDR " + newDR + " dR " + dR + " decrement " + decrement + "----");
+                }
+            }
+            if (retry) {
+                System.out.println("Max number of classifiers per cascade reached, retrying...");
+                continue;
             }
             if (stage == null) throw new RuntimeException("stage is null");
             cascadedClassifier.add(stage);
@@ -104,6 +135,7 @@ public class CascadedClassifier {
                     if (isFace) N.add(nonFace);
                 }
             }
+            layer++;
         }
         return cascadedClassifier;
     }

@@ -41,11 +41,17 @@ public class Adaboost {
         for (int round = 0; round < maxTrainingRounds;  round++) {
             // 0. normalize the weights
             double sumOfWeight = sumOfPosWeight + sumOfNegWeight;
-            sumOfPosWeight /= sumOfWeight;
-            sumOfNegWeight /= sumOfWeight;
+//            sumOfPosWeight /= sumOfWeight;
+//            sumOfNegWeight /= sumOfWeight;
+            sumOfPosWeight = 0;
+            sumOfNegWeight = 0;
             for (TrainedImage image : images) {
                 double oldWeight = image.getWeight();
                 image.setWeight(oldWeight / sumOfWeight);
+
+                // try re-calculation due to precision errors
+                if (image.getLabel() == FACE) sumOfPosWeight += image.getWeight();
+                else sumOfNegWeight += image.getWeight();
             }
 
             // 1. find best stump, and the return values from the best stump should contain
@@ -127,9 +133,7 @@ public class Adaboost {
 
 
             double sumNegAboveT = (sumOfNegWeight - sumNegBelowT);
-            if (sumNegAboveT < 0) sumNegAboveT = 0.001;
             double sumPosAboveT = (sumOfPosWeight - sumPosBelowT);
-            if (sumPosAboveT < 0) sumPosAboveT = 0.001;
             double ePos = sumPosBelowT + sumNegAboveT;
             double eNeg = sumNegBelowT + sumPosAboveT;
             double threshold = ((data.get(i).getFeatureValue() + data.get(i + 1).getFeatureValue()) / 2);
