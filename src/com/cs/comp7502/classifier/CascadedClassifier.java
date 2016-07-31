@@ -101,6 +101,7 @@ public class CascadedClassifier implements JSONRW {
                 if (discard) {
                     retry = true;
                     System.out.println("----Computed stage " + layer + ", discard classifier, decrement " + decrement + "----");
+                    break;
                 }
             }
             if (retry) {
