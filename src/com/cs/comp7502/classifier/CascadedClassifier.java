@@ -85,9 +85,10 @@ public class CascadedClassifier implements JSONRW {
                 double originalThreshold = threshold;
                 double decrement = Math.abs(originalThreshold) * 0.02;
                 boolean discard;
+                int count = 0;
                 do {
                     discard = (Double.isNaN(threshold) || Double.isNaN(decrement) || Double.isInfinite(decrement) || Double.isInfinite(threshold));
-                    if (threshold < (originalThreshold - Math.abs(originalThreshold * 2))) discard = true;
+                    if (count > 10000) discard = true;
                     if (discard) break;
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold);
@@ -96,6 +97,7 @@ public class CascadedClassifier implements JSONRW {
                     double[] results = cascadedClassifier.evaluate(stage, faces, nonFaces);
                     newDR = results[0];
                     newFPR = results[1];
+                    count++;
 
                 } while (newDR < minDR * dR);
                 System.out.println("----Computed stage " + layer + ", classifier " + n + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR +" newDR " + newDR + " dR " + dR + " orginalThreshold " + originalThreshold + " finalThreshold " + stage.getStageThreshold() + " ----");
