@@ -26,7 +26,7 @@ public class CascadedClassifierTest {
 
         // evaluate
         long time = System.currentTimeMillis();
-        CascadedClassifier train = CascadedClassifier.train(featureList, 0.99, 0.95, 0.9, faces, nonFaces);
+        CascadedClassifier train = CascadedClassifier.train(featureList, 0.95, 0.95, 0.20, faces, nonFaces);
 
         // verify
         System.out.println("Time taken to generate a cascade classifier of stages #:" + train.getStages().size() + " is " + ((System.currentTimeMillis() - time) / 1000) + "s");
