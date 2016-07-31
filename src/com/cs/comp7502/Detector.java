@@ -93,8 +93,8 @@ public class Detector {
     public java.util.List<Rectangle> detectFaces(int[][] input, CascadedClassifier cascadedClassifier) {
         ArrayList<Rectangle> rectangles = new ArrayList<>();
 
-        int width = input.length;
-        int height = input[0].length;
+        int height = input.length;
+        int width = input[0].length;
 
         // find max scale
         // for each possible window
