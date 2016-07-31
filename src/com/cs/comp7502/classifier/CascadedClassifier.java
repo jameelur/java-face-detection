@@ -87,6 +87,7 @@ public class CascadedClassifier implements JSONRW {
                 boolean discard;
                 do {
                     discard = (Double.isNaN(threshold) || Double.isNaN(decrement) || Double.isInfinite(decrement) || Double.isInfinite(threshold));
+                    if (threshold < (originalThreshold - Math.abs(originalThreshold * 2))) discard = true;
                     if (discard) break;
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold);
