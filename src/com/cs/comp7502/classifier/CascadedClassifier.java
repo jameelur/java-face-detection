@@ -63,7 +63,7 @@ public class CascadedClassifier implements JSONRW {
             List<Feature> featureSubset = new ArrayList<>();
             while (newFPR > maxFPR * fPR) {
                 n++;
-                if (featureSubset.size() >= maxClassifiers) {
+                if (n > maxClassifiers) {
                     retry = true;
                     break;
                     // retry with new subset of feature
