@@ -60,7 +60,7 @@ public class CascadedClassifier implements JSONRW {
             Stage stage = null;
             boolean retry = false;
 //            Set<Integer> usedFeatures = new HashSet<>();
-            List<Feature> featureSubset = new ArrayList<>();
+//            List<Feature> featureSubset = new ArrayList<>();
             while (newFPR > maxFPR * fPR) {
                 n++;
                 if (n > maxClassifiers) {
@@ -82,8 +82,12 @@ public class CascadedClassifier implements JSONRW {
                 stage = Adaboost.learn(possibleFeatures.subList(subIndex, subIndex + n), P, N);
 
                 double threshold = stage.getStageThreshold();
-                double decrement = Math.abs(threshold) * 0.01;
+                double originalThreshold = threshold;
+                double decrement = Math.abs(originalThreshold) * 0.02;
+                boolean discard;
                 do {
+                    discard = (Double.isNaN(threshold) || Double.isNaN(decrement) || Double.isInfinite(decrement) || Double.isInfinite(threshold));
+                    if (discard) break;
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold);
                     threshold -= decrement;
@@ -93,10 +97,14 @@ public class CascadedClassifier implements JSONRW {
                     newFPR = results[1];
 
                 } while (newDR < minDR * dR);
-                System.out.println("----Computed stage " + layer + ", classifier " + n + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR +" newDR " + newDR + " dR " + dR + "----");
+                System.out.println("----Computed stage " + layer + ", classifier " + n + " newFPR " + newFPR + " maxFPR * fPR " + maxFPR * fPR +" newDR " + newDR + " dR " + dR + " orginalThreshold " + originalThreshold + " finalThreshold " + stage.getStageThreshold() + " ----");
+                if (discard) {
+                    retry = true;
+                    System.out.println("----Computed stage " + layer + ", discard classifier, decrement " + decrement + "----");
+                }
             }
             if (retry) {
-                System.out.println("Max number of classifiers per cascade reached, retrying...");
+                System.out.println("retrying...");
                 continue;
             }
 

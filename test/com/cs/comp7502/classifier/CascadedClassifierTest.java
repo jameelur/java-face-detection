@@ -36,7 +36,7 @@ public class CascadedClassifierTest {
         JSONObject result = train.encode();
         try (FileWriter file = new FileWriter("CascadeClassifier_" + System.currentTimeMillis()+".json")) {
             file.write(result.toString());
-            System.out.println("Successfully Copied JSON Object to File...");
+            System.out.println("Successfully generated json file...");
         }
     }
 
