@@ -1,6 +1,8 @@
 package com.cs.comp7502.data;
 
 import com.cs.comp7502.ImageUtils;
+import com.cs.comp7502.JSONRW;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -14,7 +16,7 @@ import java.util.Map;
 /**
  * Created by rmohamed on 7/24/2016.
  */
-public class Feature {
+public class Feature implements JSONRW {
 
     public static int FEATURE_TYPE_1 = 1;
     public static int FEATURE_TYPE_2 = 2;
@@ -171,5 +173,15 @@ public class Feature {
             }
         }
         return featureList;
+    }
+
+    @Override
+    public JSONObject encode() {
+        return null;
+    }
+
+    @Override
+    public void decode(JSONObject json) {
+
     }
 }

@@ -1,6 +1,8 @@
 package com.cs.comp7502.data;
 
 import com.cs.comp7502.ImageUtils;
+import com.cs.comp7502.JSONRW;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -8,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Stage {
+public class Stage implements JSONRW {
 
     private double stageThreshold;
     private ArrayList<Feature> classifierList = new ArrayList<>();
@@ -68,5 +70,15 @@ public class Stage {
         // if the sum of result is >= stage threshold the image contains a face
         // otherwise non face
         return sumResult >= stageThreshold ? true : false;
+    }
+
+    @Override
+    public JSONObject encode() {
+        return null;
+    }
+
+    @Override
+    public void decode(JSONObject json) {
+
     }
 }

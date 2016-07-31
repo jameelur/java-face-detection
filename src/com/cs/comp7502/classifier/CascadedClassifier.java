@@ -1,8 +1,10 @@
 package com.cs.comp7502.classifier;
 
 import com.cs.comp7502.Adaboost;
+import com.cs.comp7502.JSONRW;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CascadedClassifier {
+public class CascadedClassifier implements JSONRW {
 
     private ArrayList<Stage> stages = new ArrayList<Stage>();
 
@@ -157,5 +159,15 @@ public class CascadedClassifier {
         }
 
         return new double[]{(double) posFaceNum / faceNum, (double) negNonFaceNum / nonFaceNum};
+    }
+
+    @Override
+    public JSONObject encode() {
+        return null;
+    }
+
+    @Override
+    public void decode(JSONObject json) {
+
     }
 }
