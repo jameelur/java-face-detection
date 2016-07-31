@@ -5,7 +5,6 @@ import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
 import com.cs.comp7502.rnd.Trainer;
-import org.json.simple.parser.JSONParser;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -17,8 +16,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -287,11 +285,11 @@ public class MainUI extends JFrame {
                         System.out.println("loading json from path: " + file.getAbsolutePath());
 
                         long startTime = System.currentTimeMillis();
-                        JSONParser jsonParser = new JSONParser();
-                        JSONObject json = (JSONObject) jsonParser.parse(new FileReader(file));
+
+                        JSONObject jsonObject = new JSONObject(readFromFile(file));
 
                         cascadedClassifier = new CascadedClassifier();
-                        cascadedClassifier.decode(json);
+                        cascadedClassifier.decode(jsonObject);
 
                         long endTime   = System.currentTimeMillis();
                         long timeTaken = endTime - startTime;
@@ -440,6 +438,23 @@ public class MainUI extends JFrame {
             boolean isAlphaPremultiplied = cModel.isAlphaPremultiplied();
             return new BufferedImage(cModel, raster, isAlphaPremultiplied, null);
         }
+    }
+
+    private String readFromFile(File file) {
+        String result = "";
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                stringBuilder.append(line);
+                line = bufferedReader.readLine();
+            }
+            result = stringBuilder.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
 
