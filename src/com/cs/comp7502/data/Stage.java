@@ -2,6 +2,8 @@ package com.cs.comp7502.data;
 
 import com.cs.comp7502.ImageUtils;
 import com.cs.comp7502.JSONRW;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -79,6 +81,17 @@ public class Stage implements JSONRW {
 
     @Override
     public void decode(JSONObject json) {
-
+        try {
+            stageThreshold = json.getDouble("stageThreshold");
+            JSONArray features = json.getJSONArray("features");
+            for (int i = 0; i < features.length(); i++) {
+                JSONObject jsonObject = features.getJSONObject(i);
+                Feature feature = new Feature();
+                feature.decode(jsonObject);
+                classifierList.add(feature);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

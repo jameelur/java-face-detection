@@ -2,6 +2,7 @@ package com.cs.comp7502.data;
 
 import com.cs.comp7502.ImageUtils;
 import com.cs.comp7502.JSONRW;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -43,18 +44,16 @@ public class Feature implements JSONRW {
     }
 
     private int type;
-
     private int x;
     private int y;
-
     private int width;
     private int height;
-
     private double error;
     private double threshold;
     private int polarity;
-
     private double weight;
+
+    public Feature() {}
 
     public Feature(int type, int x, int y, int width, int height) {
         this.type = type;
@@ -182,6 +181,18 @@ public class Feature implements JSONRW {
 
     @Override
     public void decode(JSONObject json) {
-
+        try {
+            type = json.getInt("type");
+            x = json.getInt("x");
+            y = json.getInt("y");
+            width = json.getInt("width");
+            height = json.getInt("height");
+            error = json.getDouble("error");
+            threshold = json.getDouble("threshold");
+            polarity = json.getInt("polarity");
+            weight = json.getDouble("weight");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

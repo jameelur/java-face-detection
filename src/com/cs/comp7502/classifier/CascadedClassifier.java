@@ -4,6 +4,8 @@ import com.cs.comp7502.Adaboost;
 import com.cs.comp7502.JSONRW;
 import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -168,6 +170,16 @@ public class CascadedClassifier implements JSONRW {
 
     @Override
     public void decode(JSONObject json) {
-
+        try {
+            JSONArray stages = json.getJSONArray("stages");
+            for (int i = 0 ; i <stages.length(); i++){
+                JSONObject jsonObject = stages.getJSONObject(i);
+                Stage stage = new Stage();
+                stage.decode(jsonObject);
+                this.stages.add(stage);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
