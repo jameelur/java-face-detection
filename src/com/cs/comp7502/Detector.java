@@ -110,7 +110,7 @@ public class Detector {
                     }
 
                     if (cascadedClassifier.isFace(slidingWindow)) {
-                        Rectangle faceArea = new Rectangle(x, y, winSize, winSize);
+                        Rectangle faceArea = new Rectangle(y, x, winSize, winSize);
                         rectangles.add(faceArea);
                     }
                 }
