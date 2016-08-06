@@ -5,7 +5,13 @@ import com.cs.comp7502.data.Feature;
 import com.cs.comp7502.data.Stage;
 import com.cs.comp7502.rnd.WHaarClassifier;
 import com.cs.comp7502.rnd.Trainer;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -39,12 +45,14 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import static com.cs.comp7502.data.Feature.colCount;
-import static com.cs.comp7502.data.Feature.rowCount;
+import static org.opencv.imgproc.Imgproc.INTER_CUBIC;
+import static org.opencv.videoio.Videoio.CV_CAP_PROP_FRAME_HEIGHT;
+import static org.opencv.videoio.Videoio.CV_CAP_PROP_FRAME_WIDTH;
 
 @SuppressWarnings("serial")
 public class MainUI extends JFrame {
 
+    private static final String DEFAULT_FILE_LOCATION = "./cascadedClassifiers/CascadeClassifier_1469963982085_0.95_0.95_0.20.json";
     private JPopupMenu viewportPopup;
     private JLabel infoLabel = new JLabel("");
 
@@ -133,35 +141,49 @@ public class MainUI extends JFrame {
             integralImageMenuItem.setActionCommand("drawIntegral");
             viewportPopup.add(integralImageMenuItem);
 
+            viewportPopup.addSeparator();
+
             JMenuItem trainFaceMenuItem = new JMenuItem("Train base features");
             trainFaceMenuItem.addActionListener(this);
             trainFaceMenuItem.setActionCommand("trainFace1");
             viewportPopup.add(trainFaceMenuItem);
-
-            JMenuItem trainFaceMenuItem2 = new JMenuItem("Train one classifier");
-            trainFaceMenuItem2.addActionListener(this);
-            trainFaceMenuItem2.setActionCommand("trainFace2");
-            viewportPopup.add(trainFaceMenuItem2);
-
-            JMenuItem trainFaceMenuItem3 = new JMenuItem("Import existing trained classifier json");
-            trainFaceMenuItem3.addActionListener(this);
-            trainFaceMenuItem3.setActionCommand("trainFace3");
-            viewportPopup.add(trainFaceMenuItem3);
 
             JMenuItem detectFaceMenuItem = new JMenuItem("Detect Face using base features");
             detectFaceMenuItem.addActionListener(this);
             detectFaceMenuItem.setActionCommand("drawRect");
             viewportPopup.add(detectFaceMenuItem);
 
+            viewportPopup.addSeparator();
+
+            JMenuItem trainFaceMenuItem2 = new JMenuItem("Train one stage");
+            trainFaceMenuItem2.addActionListener(this);
+            trainFaceMenuItem2.setActionCommand("trainFace2");
+            viewportPopup.add(trainFaceMenuItem2);
+
             JMenuItem detectFaceMenuItem2 = new JMenuItem("Detect Face using one stage");
             detectFaceMenuItem2.addActionListener(this);
             detectFaceMenuItem2.setActionCommand("drawRect2");
             viewportPopup.add(detectFaceMenuItem2);
 
+            viewportPopup.addSeparator();
+
+            JMenuItem trainFaceMenuItem3 = new JMenuItem("Import existing trained classifier json");
+            trainFaceMenuItem3.addActionListener(this);
+            trainFaceMenuItem3.setActionCommand("trainFace3");
+            viewportPopup.add(trainFaceMenuItem3);
+
+
             JMenuItem detectFaceMenuItem3 = new JMenuItem("Detect Face using cascaded classifier");
             detectFaceMenuItem3.addActionListener(this);
             detectFaceMenuItem3.setActionCommand("drawRect3");
             viewportPopup.add(detectFaceMenuItem3);
+
+            JMenuItem detectFaceMenuItem4 = new JMenuItem("Detect Face using cascaded classifier (from webcam)");
+            detectFaceMenuItem4.addActionListener(this);
+            detectFaceMenuItem4.setActionCommand("drawRect4");
+            viewportPopup.add(detectFaceMenuItem4);
+
+            viewportPopup.addSeparator();
 
             JMenuItem exitMenuItem = new JMenuItem("exit");
             exitMenuItem.addActionListener(this);
@@ -202,12 +224,6 @@ public class MainUI extends JFrame {
                         originalImg = img;
 
                         image = ImageUtils.buildImageArray(img, false);
-
-                        // retrieve weak haar classifier
-//                        List<WHaarClassifier> computedFeatures = Trainer.train(image);
-
-                        // for each classifier perform a comparison
-//                        SimilarityComputation.voting(null,new WeakHaarClassifier(computedFeatures), weakHaarClassifiers, 0.6);
 
                         double seconds = (System.nanoTime() - start) / 1000000000.0;
                         infoLabel.setText(seconds+"");
@@ -294,7 +310,7 @@ public class MainUI extends JFrame {
                         long endTime   = System.currentTimeMillis();
                         long timeTaken = endTime - startTime;
                         System.out.println(timeTaken);
-                        JOptionPane.showMessageDialog(this, "Time taken to parse json: " + (timeTaken/1000) + "s");
+                        JOptionPane.showMessageDialog(this, "Time taken to parse json: " + (timeTaken) + "ms");
                     } catch (Exception ee) {
                         ee.printStackTrace();
                     }
@@ -350,15 +366,7 @@ public class MainUI extends JFrame {
 //                rectangles.add(faceArea);
 //                rectangles.add(faceArea2);
 
-                if (rectangles!=null) {
-                    Graphics2D drawing = img.createGraphics();
-                    drawing.setColor(Color.GREEN);
-                    float thickness = 2f;
-                    drawing.setStroke(new BasicStroke(thickness));
-                    for (Rectangle r : rectangles) {
-                        drawing.drawRect(r.x, r.y, r.height, r.width);
-                    }
-                }
+                drawRectangles();
             } else if (e.getActionCommand().equals("drawRect2")){
 
                 img = deepClone(originalImg);
@@ -366,7 +374,7 @@ public class MainUI extends JFrame {
 
                 boolean notOk = true;
                 while (notOk) {
-                    String s = JOptionPane.showInputDialog(this, "Please enter stage threshold! \n(Must be <1000 and positive)", ""+stage.getStageThreshold());
+                    String s = JOptionPane.showInputDialog(this, "Please enter stage threshold! \n(Must be <10000 and positive)", ""+stage.getStageThreshold());
                     if (s==null) {
                         return;
                     }
@@ -387,15 +395,7 @@ public class MainUI extends JFrame {
                 long doneTime = (System.currentTimeMillis() - time) / 60000;
                 System.out.println("time: " + doneTime + " mins, st: " + stageThreshold + ", # of faces detected: " + rectangles.size());
 
-                if (rectangles!=null) {
-                    Graphics2D drawing = img.createGraphics();
-                    drawing.setColor(Color.GREEN);
-                    float thickness = 2f;
-                    drawing.setStroke(new BasicStroke(thickness));
-                    for (Rectangle r : rectangles) {
-                        drawing.drawRect(r.x, r.y, r.height, r.width);
-                    }
-                }
+                drawRectangles();
             } else if (e.getActionCommand().equals("drawRect3")){
 
                 img = deepClone(originalImg);
@@ -407,21 +407,28 @@ public class MainUI extends JFrame {
                 long doneTime = (System.currentTimeMillis() - time) / 60000;
                 System.out.println("time: " + doneTime + " mins, # of faces detected: " + rectangles.size());
 
-                if (rectangles!=null) {
-                    Graphics2D drawing = img.createGraphics();
-                    drawing.setColor(Color.GREEN);
-                    float thickness = 2f;
-                    drawing.setStroke(new BasicStroke(thickness));
-                    for (Rectangle r : rectangles) {
-                        drawing.drawRect(r.x, r.y, r.height, r.width);
-                    }
-                }
-            }
-            else if (e.getActionCommand().equals("exit")) {
+                drawRectangles();
+            } else if (e.getActionCommand().equals("drawRect4")){
+
+                // check if the cascaded classifier is set, else import the default one,
+                new Thread(startWebCam).start();
+            } else if (e.getActionCommand().equals("exit")) {
                 System.exit(0);
             }
             viewportPopup = null;
             this.updateUI();
+        }
+
+        private void drawRectangles() {
+            if (rectangles!=null) {
+                Graphics2D drawing = img.createGraphics();
+                drawing.setColor(Color.GREEN);
+                float thickness = 1f;
+                drawing.setStroke(new BasicStroke(thickness));
+                for (Rectangle r : rectangles) {
+                    drawing.drawRect(r.x, r.y, r.height, r.width);
+                }
+            }
         }
 
         public void mouseDragged(MouseEvent e) {}
@@ -440,7 +447,7 @@ public class MainUI extends JFrame {
         }
     }
 
-    private String readFromFile(File file) {
+    private static String readFromFile(File file) {
         String result = "";
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
@@ -456,5 +463,58 @@ public class MainUI extends JFrame {
         }
         return result;
     }
+
+    private Runnable startWebCam = new Runnable() {
+        @Override
+        public void run() {
+            // check if the cascaded classifier is set, else import the default one,
+            if (cascadedClassifier == null) {
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(readFromFile(new File(DEFAULT_FILE_LOCATION)));
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+                cascadedClassifier = new CascadedClassifier();
+                cascadedClassifier.decode(jsonObject);
+            }
+
+            System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+
+            JFrame frame = new JFrame();
+            frame.setTitle("WebCam");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(290,150);
+            VideoPanel videoPanel = new VideoPanel();
+            frame.setContentPane(videoPanel);
+            frame.setVisible(true);
+            Mat webImage = new Mat();
+            VideoCapture vidCapture = new VideoCapture(-1);
+            if (vidCapture.isOpened()) {
+                vidCapture.set(CV_CAP_PROP_FRAME_WIDTH, 480);
+                vidCapture.set(CV_CAP_PROP_FRAME_HEIGHT, 300);
+                while (true) {
+                    vidCapture.read(webImage);
+                    if (!webImage.empty()) {
+                        long time = System.currentTimeMillis();
+                        Imgproc.resize(webImage, webImage, new Size(480, 300), 0, 0, INTER_CUBIC);
+                        Core.flip(webImage, webImage, 1);
+                        frame.setSize(2 * webImage.width() + 20, 2 * webImage.height() + 40);
+
+                        videoPanel.convertToBufferedImage(webImage);
+                        videoPanel.detectFaces(detector, cascadedClassifier);
+                        frame.repaint();
+                        System.out.println("fps: " + 1000 / (System.currentTimeMillis() - time));
+                    } else {
+                        // error message to user here
+                        System.out.println("No frame received from web cam");
+                        break;
+                    }
+
+                }
+            }
+        }
+    };
 }
 
