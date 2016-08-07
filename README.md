@@ -8,7 +8,7 @@ This requires
     * You need to configure openCV 3.1 and add it to to the project class path. Configuration steps can be found [here](http://www.rmnd.net/install-and-use-opencv-3-0-on-mac-os-x-with-eclipse-java/)
 * Java
 * Using an IDE is recommended due to the complexity of configuring openCV
-    * IntelliJ IDEA, (Download)[https://www.jetbrains.com/idea/]
+    * IntelliJ IDEA, [Download](https://www.jetbrains.com/idea/)
 
 There are two parts to the face detection
 ## Training Classifier 
