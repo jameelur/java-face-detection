@@ -62,6 +62,7 @@ public class MainUI extends JFrame {
 
     private static Map<String, List<WHaarClassifier>> weakHaarClassifiers;
     private static Stage stage;
+    private static double originalStageThreshold = 0;
     private static Detector detector;
     List<Rectangle> rectangles = new ArrayList<>();
     int[][] image;
@@ -102,6 +103,7 @@ public class MainUI extends JFrame {
         // execute
         long time = System.currentTimeMillis();
         stage = Adaboost.learn(trainingFeatures, faceFiles, nonfaceFiles);
+        originalStageThreshold = stage.getStageThreshold();
         System.out.println("Time taken to boost: " + ((System.currentTimeMillis() - time)/1000) + "s");
     }
 
@@ -329,6 +331,10 @@ public class MainUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "Load an image first");
                     return;
                 }
+                if (weakHaarClassifiers == null) {
+                    JOptionPane.showMessageDialog(this, "Train the base features first");
+                    return;
+                }
                 img = deepClone(originalImg);
                 double finalThreshold = 0.6;
                 double similarityThreshold = 0.6;
@@ -374,18 +380,22 @@ public class MainUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "Load an image first");
                     return;
                 }
+                if (stage == null) {
+                    JOptionPane.showMessageDialog(this, "Train a stage first");
+                    return;
+                }
                 img = deepClone(originalImg);
                 double stageThreshold = 0.6;
 
                 boolean notOk = true;
                 while (notOk) {
-                    String s = JOptionPane.showInputDialog(this, "Please enter stage threshold! \n(Must be <10000 and positive)", ""+stage.getStageThreshold());
+                    String s = JOptionPane.showInputDialog(this, "Please enter stage threshold! \n(Must be <"+originalStageThreshold*2+ " and positive)", ""+ originalStageThreshold*2);
                     if (s==null) {
                         return;
                     }
                     try {
                         double d = Double.parseDouble(s);
-                        if (d>=0.0 && d<10000.0) {
+                        if (d>=0.0 && d<originalStageThreshold*2) {
                             notOk = false;
                             stageThreshold = d;
                         }
