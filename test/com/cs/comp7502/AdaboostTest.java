@@ -1,21 +1,17 @@
 package com.cs.comp7502;
 
-import com.cs.comp7502.Adaboost;
-import com.cs.comp7502.data.Feature;
-import com.cs.comp7502.data.Stage;
-import com.cs.comp7502.rnd.WHaarClassifier;
+import com.cs.comp7502.classifier.Feature;
+import com.cs.comp7502.classifier.Stage;
+import com.cs.comp7502.training.Adaboost;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cs.comp7502.Adaboost.*;
-import static com.cs.comp7502.data.Feature.FEATURE_TYPE_1;
-import static com.cs.comp7502.data.Feature.colCount;
-import static com.cs.comp7502.data.Feature.rowCount;
+import static com.cs.comp7502.training.Adaboost.*;
+import static com.cs.comp7502.classifier.Feature.FEATURE_TYPE_1;
 import static org.junit.Assert.*;
 
 /**

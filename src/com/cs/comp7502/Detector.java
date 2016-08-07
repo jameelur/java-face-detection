@@ -1,9 +1,10 @@
 package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadedClassifier;
-import com.cs.comp7502.data.Stage;
-import com.cs.comp7502.rnd.Trainer;
-import com.cs.comp7502.rnd.WHaarClassifier;
+import com.cs.comp7502.classifier.Stage;
+import com.cs.comp7502.training.Trainer;
+import com.cs.comp7502.training.WHaarClassifier;
+import com.cs.comp7502.utils.ColourUtils;
 
 import java.awt.*;
 import java.util.*;
@@ -11,16 +12,10 @@ import java.util.List;
 
 public class Detector {
 
-    CascadedClassifier cClassifier;
-
     /**
      * for testing
      */
     public Detector() {
-    }
-
-    public Detector(CascadedClassifier cClassifier) {
-        this.cClassifier = cClassifier;
     }
 
     public java.util.List<Rectangle> detectFaces(int[][] input, Map<String, List<WHaarClassifier>> trainedClassifiers, double finalThreshold, double similarityThreshold) {
@@ -28,13 +23,6 @@ public class Detector {
 
         int width = input.length;
         int height = input[0].length;
-
-//        int[][] image = new int[height][width];
-//        int[][] image2 = new int[height][width];
-
-        // calculate intensity integral image
-        // calculate intensity squared integral image
-//        ImageUtils.buildIntegralImage(image, image2, width, height);
 
         // find max scale
         // for each possible window

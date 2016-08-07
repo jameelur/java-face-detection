@@ -1,4 +1,4 @@
-package com.cs.comp7502;
+package com.cs.comp7502.classifier;
 
 import org.json.JSONObject;
 /**

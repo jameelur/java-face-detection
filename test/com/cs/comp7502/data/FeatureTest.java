@@ -1,12 +1,13 @@
 package com.cs.comp7502.data;
 
-import com.cs.comp7502.ImageUtils;
+import com.cs.comp7502.utils.ImageUtils;
+import com.cs.comp7502.classifier.Feature;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
 
-import static com.cs.comp7502.data.Feature.*;
+import static com.cs.comp7502.classifier.Feature.*;
 import static org.junit.Assert.*;
 
 /**

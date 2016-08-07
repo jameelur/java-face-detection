@@ -1,7 +1,9 @@
 package com.cs.comp7502.rnd;
 
-import com.cs.comp7502.ImageUtils;
+import com.cs.comp7502.utils.ImageUtils;
 import com.cs.comp7502.SimilarityComputation;
+import com.cs.comp7502.training.Trainer;
+import com.cs.comp7502.training.WHaarClassifier;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;

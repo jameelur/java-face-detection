@@ -1,5 +1,6 @@
 package com.cs.comp7502;
 
+import com.cs.comp7502.utils.ImageUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

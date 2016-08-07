@@ -1,10 +1,12 @@
 package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadedClassifier;
-import com.cs.comp7502.data.Feature;
-import com.cs.comp7502.data.Stage;
-import com.cs.comp7502.rnd.WHaarClassifier;
-import com.cs.comp7502.rnd.Trainer;
+import com.cs.comp7502.classifier.Feature;
+import com.cs.comp7502.classifier.Stage;
+import com.cs.comp7502.training.Adaboost;
+import com.cs.comp7502.training.WHaarClassifier;
+import com.cs.comp7502.training.Trainer;
+import com.cs.comp7502.utils.ImageUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.core.Core;
@@ -52,7 +54,7 @@ import static org.opencv.videoio.Videoio.CV_CAP_PROP_FRAME_WIDTH;
 @SuppressWarnings("serial")
 public class MainUI extends JFrame {
 
-    private static final String DEFAULT_FILE_LOCATION = "./cascadedClassifiers/CascadeClassifier_1469963982085_0.95_0.95_0.20.json";
+    private static final String DEFAULT_FILE_LOCATION = "./cascadedClassifiers/cascade_classifier_default.json";
     private JPopupMenu viewportPopup;
     private JLabel infoLabel = new JLabel("");
 
@@ -232,13 +234,16 @@ public class MainUI extends JFrame {
                     }
                 }
             } else if (e.getActionCommand().equals("drawIntegral")){
+                if (originalImg == null) {
+                    JOptionPane.showMessageDialog(this, "Load an image first");
+                    return;
+                }
                 img = deepClone(originalImg);
                 if (img!=null) {
                     JFrame frame = new JFrame();
                     JLabel jl = new JLabel();
                     frame.setTitle("Integral Image");
 
-                    //TODO
                     image = ImageUtils.buildImageArray(img, true);
                     int h = image.length;
                     int w = image[0].length;
@@ -275,7 +280,7 @@ public class MainUI extends JFrame {
                 long endTime   = System.currentTimeMillis();
                 long timeTook = endTime - startTime;
                 System.out.println(timeTook);
-                JOptionPane.showMessageDialog(this, "Time took for Trainer.trainFaces(): " + (timeTook/1000) + "s");
+                JOptionPane.showMessageDialog(this, "Time taken to train faces " + (timeTook/1000.0) + "s");
 
             }else if (e.getActionCommand().equals("trainFace2")) {
 
@@ -320,7 +325,10 @@ public class MainUI extends JFrame {
 
             }
             else if (e.getActionCommand().equals("drawRect")){
-
+                if (originalImg == null) {
+                    JOptionPane.showMessageDialog(this, "Load an image first");
+                    return;
+                }
                 img = deepClone(originalImg);
                 double finalThreshold = 0.6;
                 double similarityThreshold = 0.6;
@@ -354,21 +362,17 @@ public class MainUI extends JFrame {
                     } catch (Exception ee){
                     }
                 }
-                //too scared to run or test this bit
                 long time = System.currentTimeMillis();
-                rectangles = (ArrayList<Rectangle>) detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
+                rectangles = detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
                 long doneTime = (System.currentTimeMillis() - time) / 60000;
                 System.out.println("time: " + doneTime + " mins, ft: " + finalThreshold +", st: " +similarityThreshold + ", # of faces detected: " + rectangles.size());
 
-                //for testing color and line thickness
-//                Rectangle faceArea = new Rectangle(50, 50, 70, 70);
-//                Rectangle faceArea2 = new Rectangle(235, 220, 110, 110);
-//                rectangles.add(faceArea);
-//                rectangles.add(faceArea2);
-
                 drawRectangles();
             } else if (e.getActionCommand().equals("drawRect2")){
-
+                if (originalImg == null) {
+                    JOptionPane.showMessageDialog(this, "Load an image first");
+                    return;
+                }
                 img = deepClone(originalImg);
                 double stageThreshold = 0.6;
 
@@ -397,8 +401,13 @@ public class MainUI extends JFrame {
 
                 drawRectangles();
             } else if (e.getActionCommand().equals("drawRect3")){
-
+                if (originalImg == null) {
+                    JOptionPane.showMessageDialog(this, "Load an image first");
+                    return;
+                }
                 img = deepClone(originalImg);
+
+                if (cascadedClassifier == null) loadDefaultCascadedClassifier();
 
                 //too scared to run or test this bit
                 long time = System.currentTimeMillis();
@@ -469,15 +478,7 @@ public class MainUI extends JFrame {
         public void run() {
             // check if the cascaded classifier is set, else import the default one,
             if (cascadedClassifier == null) {
-                JSONObject jsonObject = null;
-                try {
-                    jsonObject = new JSONObject(readFromFile(new File(DEFAULT_FILE_LOCATION)));
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-
-                cascadedClassifier = new CascadedClassifier();
-                cascadedClassifier.decode(jsonObject);
+                loadDefaultCascadedClassifier();
             }
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
@@ -516,5 +517,17 @@ public class MainUI extends JFrame {
             }
         }
     };
+
+    private void loadDefaultCascadedClassifier() {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(readFromFile(new File(DEFAULT_FILE_LOCATION)));
+        } catch (JSONException e1) {
+            e1.printStackTrace();
+        }
+
+        cascadedClassifier = new CascadedClassifier();
+        cascadedClassifier.decode(jsonObject);
+    }
 }
 

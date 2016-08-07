@@ -1,19 +1,13 @@
 package com.cs.comp7502.classifier;
 
-import com.cs.comp7502.Adaboost;
-import com.cs.comp7502.JSONRW;
-import com.cs.comp7502.data.Feature;
-import com.cs.comp7502.data.Stage;
+import com.cs.comp7502.training.Adaboost;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CascadedClassifier implements JSONRW {
@@ -59,26 +53,13 @@ public class CascadedClassifier implements JSONRW {
 
             Stage stage = null;
             boolean retry = false;
-//            Set<Integer> usedFeatures = new HashSet<>();
-//            List<Feature> featureSubset = new ArrayList<>();
             while (newFPR > maxFPR * fPR) {
                 n++;
                 if (n > maxClassifiers) {
                     retry = true;
                     break;
-                    // retry with new subset of feature
                 }
-                // train a adaboost classifier with posSet, negSet and a feature set having n feature
-                // evaluate current cascade classifier on validation set to get newFPR and newDR
-
-//                while (true) {
-                    int subIndex = ThreadLocalRandom.current().nextInt(0, possibleFeatures.size() - n);
-//                    if (!usedFeatures.contains(subIndex)) {
-//                        featureSubset.add(possibleFeatures.get(subIndex));
-//                        usedFeatures.add(subIndex);
-//                        break;
-//                    }
-//                }
+                int subIndex = ThreadLocalRandom.current().nextInt(0, possibleFeatures.size() - n);
                 stage = Adaboost.learn(possibleFeatures.subList(subIndex, subIndex + n), P, N);
 
                 double threshold = stage.getStageThreshold();
@@ -88,7 +69,7 @@ public class CascadedClassifier implements JSONRW {
                 int count = 0;
                 do {
                     discard = (Double.isNaN(threshold) || Double.isNaN(decrement) || Double.isInfinite(decrement) || Double.isInfinite(threshold));
-                    if (count > 10000) discard = true;
+                    if (count > 10000) discard = true; // prevent infinite loop // TODO check why it can go < T - |T|
                     if (discard) break;
                     //decrease the stage threshold for this adaboost classifier
                     stage.setStageThreshold(threshold);

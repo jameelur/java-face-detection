@@ -1,14 +1,13 @@
 package com.cs.comp7502;
 
 import com.cs.comp7502.classifier.CascadedClassifier;
+import com.cs.comp7502.utils.ImageUtils;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.util.*;
 import java.util.List;
 
 /**

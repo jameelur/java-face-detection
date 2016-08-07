@@ -1,6 +1,5 @@
 package com.cs.comp7502.classifier;
 
-import com.cs.comp7502.data.Feature;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -9,8 +8,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class CascadedClassifierTest {
     @Test

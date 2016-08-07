@@ -1,6 +1,6 @@
 package com.cs.comp7502;
 
-import com.cs.comp7502.rnd.WHaarClassifier;
+import com.cs.comp7502.training.WHaarClassifier;
 
 import java.io.*;
 import java.util.List;
@@ -19,8 +19,6 @@ public class SimilarityComputation {
     public static double cosSimilarity(List<Integer> vector1, List<Integer> vector2) {
         if (vector1.size() != vector2.size()) {
             throw new RuntimeException("Two vectors have different length, vector1.size(): " + vector1.size() + ", vector2.size(): " + vector2.size());
-//            System.out.println("Two vectors have different length");
-//            return 0.0;
         }
 
         int innerDot = 0;
