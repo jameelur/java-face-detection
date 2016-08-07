@@ -1,4 +1,4 @@
-package com.cs.comp7502;
+package com.cs.comp7502.training;
 
 import com.cs.comp7502.classifier.Feature;
 import com.cs.comp7502.classifier.Stage;

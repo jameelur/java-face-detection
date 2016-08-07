@@ -1,4 +1,4 @@
-package com.cs.comp7502.data;
+package com.cs.comp7502.classifier;
 
 import com.cs.comp7502.utils.ImageUtils;
 import com.cs.comp7502.classifier.Feature;
