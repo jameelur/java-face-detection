@@ -28,8 +28,8 @@ public class TrainerTest {
         // execture
         Map<String, List<WHaarClassifier>> trainedClassifiers = Trainer.trainFaces();
 
-        File faceFolder = new File("../f1");
-        File nonfaceFolder = new File("../nf1");
+        File faceFolder = new File("res/trainingSet/faces");
+        File nonfaceFolder = new File("res/trainingSet/nonFaces");
 
         File[] faceFiles = faceFolder.listFiles();
         File[] nonfaceFiles = nonfaceFolder.listFiles();

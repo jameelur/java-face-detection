@@ -23,7 +23,7 @@ public class Trainer {
         List<WHaarClassifier> trainedClassifierList = new ArrayList<>();
         List<int[][]> imageArray = new ArrayList<>();
 
-        File folder = new File("../24by24faces");
+        File folder = new File("res/baseFeatureTrainingSet/faces");
 //        File folder = new File("res/faces/test");
         File[] files = folder.listFiles();
 

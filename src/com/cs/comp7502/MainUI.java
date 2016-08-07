@@ -291,7 +291,7 @@ public class MainUI extends JFrame {
                 long endTime   = System.currentTimeMillis();
                 long timeTook = endTime - startTime;
                 System.out.println(timeTook);
-                JOptionPane.showMessageDialog(this, "Time took for initClassifier(): " + (timeTook/1000) + "s");
+                JOptionPane.showMessageDialog(this, "Time taken to train 1 stage: " + (timeTook/1000.0) + "s");
 
             }else if (e.getActionCommand().equals("trainFace3")) {
                 final JFileChooser fc = new JFileChooser();
@@ -366,6 +366,7 @@ public class MainUI extends JFrame {
                 rectangles = detector.detectFaces(image, weakHaarClassifiers, finalThreshold, similarityThreshold);
                 long doneTime = (System.currentTimeMillis() - time) / 60000;
                 System.out.println("time: " + doneTime + " mins, ft: " + finalThreshold +", st: " +similarityThreshold + ", # of faces detected: " + rectangles.size());
+                JOptionPane.showMessageDialog(this, "time: " + doneTime + " mins, ft: " + finalThreshold +", st: " +similarityThreshold + ", # of faces detected: " + rectangles.size());
 
                 drawRectangles();
             } else if (e.getActionCommand().equals("drawRect2")){
@@ -398,7 +399,7 @@ public class MainUI extends JFrame {
                 rectangles = detector.detectFaces(image, stage);
                 long doneTime = (System.currentTimeMillis() - time) / 60000;
                 System.out.println("time: " + doneTime + " mins, st: " + stageThreshold + ", # of faces detected: " + rectangles.size());
-
+                JOptionPane.showMessageDialog(this, "time: " + doneTime + " mins, st: " + stageThreshold + ", # of faces detected: " + rectangles.size());
                 drawRectangles();
             } else if (e.getActionCommand().equals("drawRect3")){
                 if (originalImg == null) {
@@ -413,9 +414,9 @@ public class MainUI extends JFrame {
                 long time = System.currentTimeMillis();
 
                 rectangles = detector.detectFaces(image, cascadedClassifier);
-                long doneTime = (System.currentTimeMillis() - time) / 60000;
+                double doneTime = (System.currentTimeMillis() - time) / 60000.0;
                 System.out.println("time: " + doneTime + " mins, # of faces detected: " + rectangles.size());
-
+                JOptionPane.showMessageDialog(this, "time: " + doneTime + " mins, # of faces detected: " + rectangles.size());
                 drawRectangles();
             } else if (e.getActionCommand().equals("drawRect4")){
 
